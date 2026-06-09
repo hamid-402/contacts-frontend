@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
 
 const links = [
   { to: "/",           icon: "⊞", label: "Home"       },
@@ -7,13 +8,21 @@ const links = [
   { to: "/categories", icon: "🏷️", label: "Categories" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ user }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-brand">
         <span className="brand-dot" />
         Contacts<span className="brand-accent">.</span>
       </div>
+
       <div className="navbar-links">
         {links.map((l) => (
           <NavLink
@@ -26,6 +35,11 @@ export default function Navbar() {
             <span className="nav-label">{l.label}</span>
           </NavLink>
         ))}
+      </div>
+
+      <div className="navbar-bottom">
+        <div className="nav-user">✉️ {user?.email}</div>
+        <button className="btn-logout" onClick={handleLogout}>Sign out</button>
       </div>
     </nav>
   );

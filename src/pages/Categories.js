@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { API, Avatar, CATEGORIES, CATEGORY_COLORS } from "../components/shared";
+import { API, Avatar, CATEGORIES, CATEGORY_COLORS, getUser } from "../components/shared";
 
 export default function Categories() {
   const [contacts, setContacts] = useState([]);
@@ -8,7 +8,14 @@ export default function Categories() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API}/contacts`).then((r) => r.json()).then(setContacts).catch(() => {});
+    getUser().then((u) => {
+      if (u) {
+        fetch(`${API}/contacts?user_id=${u.id}`)
+          .then((r) => r.json())
+          .then(setContacts)
+          .catch(() => {});
+      }
+    });
   }, []);
 
   return (
@@ -26,7 +33,6 @@ export default function Categories() {
 
           return (
             <div key={cat} className="cat-section" style={{ borderColor: `${accent}22` }}>
-              {/* Header */}
               <div className="cat-section-header" onClick={() => setOpen(isOpen ? null : cat)}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div className="cat-dot" style={{ background: accent }} />
@@ -36,7 +42,6 @@ export default function Categories() {
                 <span className="cat-chevron" style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
               </div>
 
-              {/* Contacts in this category */}
               {isOpen && (
                 <div className="cat-section-list">
                   {group.length === 0 ? (

@@ -1,13 +1,12 @@
-// ── API base ──────────────────────────────────────────────
+import { supabase } from "../supabase";
+
 export const API = "https://contacts-backend-zcb2.onrender.com";
 
 export const todayKey = new Date().toDateString();
 
-// ── Initials ──────────────────────────────────────────────
 export const initials = (name) =>
   name.trim().split(" ").map((w) => w[0] || "").join("").substring(0, 2).toUpperCase() || "?";
 
-// ── Avatar colors ─────────────────────────────────────────
 const COLORS = [
   ["#0d2a1e", "#00d98b"],
   ["#1a1030", "#7c6fcd"],
@@ -36,7 +35,6 @@ export function Avatar({ name, size = 42 }) {
   );
 }
 
-// ── Category list ─────────────────────────────────────────
 export const CATEGORIES = ["Family", "Work", "Friends", "Other"];
 
 export const CATEGORY_COLORS = {
@@ -44,4 +42,9 @@ export const CATEGORY_COLORS = {
   Work:    { bg: "#0a1e2a", accent: "#4ab8e0" },
   Friends: { bg: "#0d2a1e", accent: "#00d98b" },
   Other:   { bg: "#1a1030", accent: "#7c6fcd" },
+};
+
+export const getUser = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user || null;
 };

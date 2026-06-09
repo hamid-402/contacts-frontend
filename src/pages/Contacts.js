@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { API, todayKey, Avatar, CATEGORIES } from "../components/shared";
+import { API, todayKey, Avatar, CATEGORIES, getUser } from "../components/shared";
 
 function EditModal({ contact, onSave, onClose }) {
-  const [name, setName]       = useState(contact.name);
-  const [phone, setPhone]     = useState(contact.phone);
+  const [name, setName]         = useState(contact.name);
+  const [phone, setPhone]       = useState(contact.phone);
   const [category, setCategory] = useState(contact.category || "Other");
 
   return (
@@ -34,24 +34,34 @@ function EditModal({ contact, onSave, onClose }) {
 }
 
 export default function Contacts() {
-  const [contacts, setContacts]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [name, setName]           = useState("");
-  const [phone, setPhone]         = useState("");
-  const [category, setCategory]   = useState("Other");
-  const [nameErr, setNameErr]     = useState(false);
-  const [phoneErr, setPhoneErr]   = useState(false);
+  const [contacts, setContacts]     = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [name, setName]             = useState("");
+  const [phone, setPhone]           = useState("");
+  const [category, setCategory]     = useState("Other");
+  const [nameErr, setNameErr]       = useState(false);
+  const [phoneErr, setPhoneErr]     = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [newIds, setNewIds]       = useState(new Set());
+  const [newIds, setNewIds]         = useState(new Set());
+  const [userId, setUserId]         = useState(null);
   const phoneRef = useRef();
   const navigate = useNavigate();
 
-  const fetch_ = () => {
-    setLoading(true);
-    fetch(`${API}/contacts`).then((r) => r.json()).then((d) => { setContacts(d); setLoading(false); }).catch(() => setLoading(false));
-  };
+  useEffect(() => {
+    getUser().then((u) => {
+      if (u) { setUserId(u.id); fetchContacts(u.id); }
+    });
+  }, []);
 
-  useEffect(() => { fetch_(); }, []);
+  const fetchContacts = async (uid) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/contacts?user_id=${uid}`);
+      const data = await res.json();
+      setContacts(data);
+    } catch { setContacts([]); }
+    setLoading(false);
+  };
 
   const addContact = async () => {
     const n = name.trim(), p = phone.trim();
@@ -61,18 +71,18 @@ export default function Contacts() {
     if (err) return;
     const res = await fetch(`${API}/contacts`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: n, phone: p, category, date: todayKey }),
+      body: JSON.stringify({ name: n, phone: p, category, date: todayKey, user_id: userId }),
     });
     const created = await res.json();
     setName(""); setPhone(""); setCategory("Other");
     setNewIds((prev) => new Set([...prev, created.id]));
     setTimeout(() => setNewIds((prev) => { const s = new Set(prev); s.delete(created.id); return s; }), 2500);
-    fetch_();
+    fetchContacts(userId);
   };
 
   const deleteContact = async (id) => {
     await fetch(`${API}/contacts/${id}`, { method: "DELETE" });
-    fetch_();
+    fetchContacts(userId);
   };
 
   const saveEdit = async (updated) => {
@@ -80,7 +90,8 @@ export default function Contacts() {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
-    setEditTarget(null); fetch_();
+    setEditTarget(null);
+    fetchContacts(userId);
   };
 
   return (
@@ -90,7 +101,6 @@ export default function Contacts() {
         <span className="page-count">{contacts.length}</span>
       </div>
 
-      {/* Add form */}
       <div className="panel">
         <div className="panel-label">Add new contact</div>
         <div className="input-wrap"><span className="input-icon">👤</span>
@@ -109,7 +119,6 @@ export default function Contacts() {
         <button className="btn-add" onClick={addContact}>+ Add Contact</button>
       </div>
 
-      {/* List */}
       {loading ? (
         <div className="page-loading"><div className="spinner" /></div>
       ) : contacts.length === 0 ? (
