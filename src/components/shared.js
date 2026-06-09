@@ -1,5 +1,5 @@
 // ── API base ──────────────────────────────────────────────
-export const API = "http://localhost:3001";
+export const API = "https://contacts-backend-zcb2.onrender.com";
 
 export const todayKey = new Date().toDateString();
 
