@@ -49,7 +49,9 @@ export default function Contacts() {
 
   useEffect(() => {
     getUser().then((u) => {
+      console.log("user:", u);
       if (u) { setUserId(u.id); fetchContacts(u.id); }
+      else { console.log("no user found"); }
     });
   }, []);
 
