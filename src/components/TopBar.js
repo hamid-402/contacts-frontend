@@ -3,7 +3,6 @@ import { t } from "../context/translations";
 
 export default function TopBar() {
   const { theme, lang, toggleTheme, toggleLang } = useSettings();
-  const tr = t[lang];
 
   return (
     <div className="topbar">
