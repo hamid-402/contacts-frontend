@@ -893,7 +893,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 200;
@@ -902,13 +902,13 @@
 
 .topbar-brand {
   font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 14px;
   color: #e0f0e8;
-  letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex: 1;
 }
 
 .topbar-dot {
@@ -923,17 +923,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  /* همیشه سمت راست */
-  margin-left: auto;
-  margin-right: 0;
+  flex-shrink: 0;
+  margin-left: 16px;
 }
 
 [dir="rtl"] .topbar-actions {
   margin-left: 0;
-  margin-right: auto;
-  /* ولی position ثابت بمونه */
-  position: absolute;
-  right: 20px;
+  margin-right: 16px;
 }
 
 .btn-lang {

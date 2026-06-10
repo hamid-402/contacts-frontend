@@ -7,10 +7,10 @@ export default function TopBar() {
     <div className="topbar">
       <div className="topbar-brand">
         <span className="topbar-dot" />
-        {lang === "fa" ? "مخاطبین" : "Contacts"}<span className="accent">.</span>
+        {lang === "fa" ? "دفتر تلفن آنلاین" : "Online Contacts"}
       </div>
       <div className="topbar-actions">
-        <button className="btn-setting" onClick={toggleTheme} title={theme === "dark" ? "حالت روشن" : "حالت تاریک"}>
+        <button className="btn-setting" onClick={toggleTheme}>
           {theme === "dark" ? "☀️" : "🌙"}
         </button>
         <button className="btn-lang" onClick={toggleLang}>
