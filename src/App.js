@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 import { SettingsProvider } from "./context/SettingsContext";
 import Navbar from "./components/Navbar";
+import TopBar from "./components/TopBar";
 import Home from "./pages/Home";
 import Contacts from "./pages/Contacts";
 import Search from "./pages/Search";
@@ -39,17 +40,18 @@ export default function App() {
     <SettingsProvider>
       <BrowserRouter>
         <div className="app-bg">
+          <TopBar />
           <div className="app-layout">
             {user && <Navbar user={user} />}
             <main className="app-main">
               <Routes>
-                <Route path="/login"    element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/" element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
-                <Route path="/contacts" element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
+                <Route path="/login"        element={<Login />} />
+                <Route path="/register"     element={<Register />} />
+                <Route path="/"             element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
+                <Route path="/contacts"     element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
                 <Route path="/contacts/:id" element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
-                <Route path="/search" element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
-                <Route path="/categories" element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
+                <Route path="/search"       element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
+                <Route path="/categories"   element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
               </Routes>
             </main>
           </div>

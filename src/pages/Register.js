@@ -11,7 +11,7 @@ export default function Register() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
   const navigate = useNavigate();
-  const { lang, toggleLang, toggleTheme, theme } = useSettings();
+  const { lang } = useSettings();
   const tr = t[lang];
 
   const handleRegister = async () => {
@@ -30,11 +30,6 @@ export default function Register() {
 
   return (
     <div className="auth-bg">
-      <div className="auth-settings-btns">
-        <button className="btn-setting" onClick={toggleTheme}>{theme === "dark" ? "☀️" : "🌙"}</button>
-        <button className="btn-setting" onClick={toggleLang}>{lang === "fa" ? "EN" : "FA"}</button>
-      </div>
-
       <div className="auth-card">
         <h1 className="auth-title">{tr.createAccount}<span className="accent">.</span></h1>
         <p className="auth-sub">{tr.createAccountSub}</p>

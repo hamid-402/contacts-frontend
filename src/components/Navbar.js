@@ -5,7 +5,7 @@ import { t } from "../context/translations";
 
 export default function Navbar({ user }) {
   const navigate = useNavigate();
-  const { theme, lang, toggleTheme, toggleLang } = useSettings();
+  const { lang } = useSettings();
   const tr = t[lang];
 
   const links = [
@@ -22,11 +22,6 @@ export default function Navbar({ user }) {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <span className="brand-dot" />
-        {lang === "fa" ? "مخاطبین" : "Contacts"}<span className="brand-accent">.</span>
-      </div>
-
       <div className="navbar-links">
         {links.map((l) => (
           <NavLink
@@ -42,16 +37,6 @@ export default function Navbar({ user }) {
       </div>
 
       <div className="navbar-bottom">
-        {/* دکمه‌های تم و زبان */}
-        <div className="settings-btns">
-          <button className="btn-setting" onClick={toggleTheme} title="تغییر تم">
-            {theme === "dark" ? "☀️" : "🌙"}
-          </button>
-          <button className="btn-setting" onClick={toggleLang} title="تغییر زبان">
-            {lang === "fa" ? "EN" : "FA"}
-          </button>
-        </div>
-
         <div className="nav-user">✉️ {user?.email}</div>
         <button className="btn-logout" onClick={handleLogout}>{tr.signOut}</button>
       </div>
