@@ -2,6 +2,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
+import { SettingsProvider } from "./context/SettingsContext";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Contacts from "./pages/Contacts";
@@ -35,23 +36,25 @@ export default function App() {
   if (loading) return <div className="page-loading"><div className="spinner" /></div>;
 
   return (
-    <BrowserRouter>
-      <div className="app-bg">
-        <div className="app-layout">
-          {user && <Navbar user={user} />}
-          <main className="app-main">
-            <Routes>
-              <Route path="/login"    element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
-              <Route path="/contacts" element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
-              <Route path="/contacts/:id" element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
-              <Route path="/search" element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
-              <Route path="/categories" element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
-            </Routes>
-          </main>
+    <SettingsProvider>
+      <BrowserRouter>
+        <div className="app-bg">
+          <div className="app-layout">
+            {user && <Navbar user={user} />}
+            <main className="app-main">
+              <Routes>
+                <Route path="/login"    element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/" element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
+                <Route path="/contacts" element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
+                <Route path="/contacts/:id" element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
+                <Route path="/search" element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
+                <Route path="/categories" element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
+              </Routes>
+            </main>
+          </div>
         </div>
-      </div>
-    </BrowserRouter>
+      </BrowserRouter>
+    </SettingsProvider>
   );
 }

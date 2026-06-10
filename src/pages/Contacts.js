@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { API, todayKey, Avatar, CATEGORIES, getUser } from "../components/shared";
+import { useSettings } from "../context/SettingsContext";
+import { t } from "../context/translations";
 
-function EditModal({ contact, onSave, onClose }) {
+function EditModal({ contact, onSave, onClose, tr }) {
   const [name, setName]         = useState(contact.name);
   const [phone, setPhone]       = useState(contact.phone);
   const [category, setCategory] = useState(contact.category || "Other");
@@ -10,12 +12,12 @@ function EditModal({ contact, onSave, onClose }) {
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal">
-        <h3 className="modal-title">Edit Contact</h3>
+        <h3 className="modal-title">{tr.editContact}</h3>
         <div className="input-wrap"><span className="input-icon">👤</span>
-          <input className="app-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+          <input className="app-input" value={name} onChange={(e) => setName(e.target.value)} placeholder={tr.fullName} />
         </div>
         <div className="input-wrap"><span className="input-icon">📞</span>
-          <input className="app-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" />
+          <input className="app-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={tr.phoneNumber} />
         </div>
         <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🏷️</span>
           <select className="app-input" value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -23,9 +25,9 @@ function EditModal({ contact, onSave, onClose }) {
           </select>
         </div>
         <div className="modal-btns">
-          <button className="btn-cancel" onClick={onClose}>Cancel</button>
+          <button className="btn-cancel" onClick={onClose}>{tr.cancel}</button>
           <button className="btn-save" onClick={() => name.trim() && phone.trim() && onSave({ ...contact, name: name.trim(), phone: phone.trim(), category })}>
-            Save Changes
+            {tr.saveChanges}
           </button>
         </div>
       </div>
@@ -46,12 +48,12 @@ export default function Contacts() {
   const [userId, setUserId]         = useState(null);
   const phoneRef = useRef();
   const navigate = useNavigate();
+  const { lang } = useSettings();
+  const tr = t[lang];
 
   useEffect(() => {
     getUser().then((u) => {
-      console.log("user:", u);
       if (u) { setUserId(u.id); fetchContacts(u.id); }
-      else { console.log("no user found"); }
     });
   }, []);
 
@@ -99,18 +101,18 @@ export default function Contacts() {
   return (
     <div className="page">
       <div className="page-header">
-        <h2 className="page-title">Contacts</h2>
+        <h2 className="page-title">{tr.contacts}</h2>
         <span className="page-count">{contacts.length}</span>
       </div>
 
       <div className="panel">
-        <div className="panel-label">Add new contact</div>
+        <div className="panel-label">{tr.addNew}</div>
         <div className="input-wrap"><span className="input-icon">👤</span>
-          <input className={`app-input ${nameErr ? "input-err" : ""}`} placeholder="Full name" value={name}
+          <input className={`app-input ${nameErr ? "input-err" : ""}`} placeholder={tr.fullName} value={name}
             onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && phoneRef.current?.focus()} />
         </div>
         <div className="input-wrap"><span className="input-icon">📞</span>
-          <input ref={phoneRef} className={`app-input ${phoneErr ? "input-err" : ""}`} placeholder="Phone number" value={phone}
+          <input ref={phoneRef} className={`app-input ${phoneErr ? "input-err" : ""}`} placeholder={tr.phoneNumber} value={phone}
             onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addContact()} />
         </div>
         <div className="input-wrap"><span className="input-icon">🏷️</span>
@@ -118,13 +120,13 @@ export default function Contacts() {
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <button className="btn-add" onClick={addContact}>+ Add Contact</button>
+        <button className="btn-add" onClick={addContact}>{tr.addContact}</button>
       </div>
 
       {loading ? (
         <div className="page-loading"><div className="spinner" /></div>
       ) : contacts.length === 0 ? (
-        <div className="empty-state"><div className="empty-icon">📭</div><p>No contacts yet</p></div>
+        <div className="empty-state"><div className="empty-icon">📭</div><p>{tr.noContacts}</p></div>
       ) : (
         <div className="contact-list">
           {contacts.map((c) => (
@@ -145,7 +147,7 @@ export default function Contacts() {
         </div>
       )}
 
-      {editTarget && <EditModal contact={editTarget} onSave={saveEdit} onClose={() => setEditTarget(null)} />}
+      {editTarget && <EditModal contact={editTarget} onSave={saveEdit} onClose={() => setEditTarget(null)} tr={tr} />}
     </div>
   );
 }

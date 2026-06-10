@@ -1,15 +1,19 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
-
-const links = [
-  { to: "/",           icon: "⊞", label: "Home"       },
-  { to: "/contacts",   icon: "👥", label: "Contacts"   },
-  { to: "/search",     icon: "🔍", label: "Search"     },
-  { to: "/categories", icon: "🏷️", label: "Categories" },
-];
+import { useSettings } from "../context/SettingsContext";
+import { t } from "../context/translations";
 
 export default function Navbar({ user }) {
   const navigate = useNavigate();
+  const { theme, lang, toggleTheme, toggleLang } = useSettings();
+  const tr = t[lang];
+
+  const links = [
+    { to: "/",           icon: "⊞", label: tr.home       },
+    { to: "/contacts",   icon: "👥", label: tr.contacts   },
+    { to: "/search",     icon: "🔍", label: tr.search     },
+    { to: "/categories", icon: "🏷️", label: tr.categories },
+  ];
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -20,7 +24,7 @@ export default function Navbar({ user }) {
     <nav className="navbar">
       <div className="navbar-brand">
         <span className="brand-dot" />
-        Contacts<span className="brand-accent">.</span>
+        {lang === "fa" ? "مخاطبین" : "Contacts"}<span className="brand-accent">.</span>
       </div>
 
       <div className="navbar-links">
@@ -38,8 +42,18 @@ export default function Navbar({ user }) {
       </div>
 
       <div className="navbar-bottom">
+        {/* دکمه‌های تم و زبان */}
+        <div className="settings-btns">
+          <button className="btn-setting" onClick={toggleTheme} title="تغییر تم">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+          <button className="btn-setting" onClick={toggleLang} title="تغییر زبان">
+            {lang === "fa" ? "EN" : "FA"}
+          </button>
+        </div>
+
         <div className="nav-user">✉️ {user?.email}</div>
-        <button className="btn-logout" onClick={handleLogout}>Sign out</button>
+        <button className="btn-logout" onClick={handleLogout}>{tr.signOut}</button>
       </div>
     </nav>
   );

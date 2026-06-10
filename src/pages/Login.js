@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "../supabase";
 import { useNavigate, Link } from "react-router-dom";
+import { useSettings } from "../context/SettingsContext";
+import { t } from "../context/translations";
 
 export default function Login() {
   const [email, setEmail]       = useState("");
@@ -8,6 +10,8 @@ export default function Login() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
   const navigate = useNavigate();
+  const { lang, toggleLang, toggleTheme, theme } = useSettings();
+  const tr = t[lang];
 
   const handleLogin = async () => {
     setLoading(true);
@@ -23,32 +27,37 @@ export default function Login() {
 
   return (
     <div className="auth-bg">
+      <div className="auth-settings-btns">
+        <button className="btn-setting" onClick={toggleTheme}>{theme === "dark" ? "☀️" : "🌙"}</button>
+        <button className="btn-setting" onClick={toggleLang}>{lang === "fa" ? "EN" : "FA"}</button>
+      </div>
+
       <div className="auth-card">
-        <h1 className="auth-title">Welcome back<span className="accent">.</span></h1>
-        <p className="auth-sub">Sign in to your account</p>
+        <h1 className="auth-title">{tr.welcomeBack}<span className="accent">.</span></h1>
+        <p className="auth-sub">{tr.signInSub}</p>
 
         {error && <div className="auth-error">{error}</div>}
 
         <div className="input-wrap">
           <span className="input-icon">✉️</span>
-          <input className="app-input" type="email" placeholder="Email" value={email}
+          <input className="app-input" type="email" placeholder={tr.email} value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
         </div>
 
         <div className="input-wrap">
           <span className="input-icon">🔒</span>
-          <input className="app-input" type="password" placeholder="Password" value={password}
+          <input className="app-input" type="password" placeholder={tr.password} value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
         </div>
 
         <button className="btn-add" onClick={handleLogin} disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? tr.signingIn : tr.signIn}
         </button>
 
         <p className="auth-link">
-          Don't have an account? <Link to="/register">Register</Link>
+          {tr.noAccount} <Link to="/register">{tr.register}</Link>
         </p>
       </div>
     </div>

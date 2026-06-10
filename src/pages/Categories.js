@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API, Avatar, CATEGORIES, CATEGORY_COLORS, getUser } from "../components/shared";
+import { useSettings } from "../context/SettingsContext";
+import { t } from "../context/translations";
 
 export default function Categories() {
   const [contacts, setContacts] = useState([]);
   const [open, setOpen]         = useState(null);
   const navigate = useNavigate();
+  const { lang } = useSettings();
+  const tr = t[lang];
 
   useEffect(() => {
     getUser().then((u) => {
@@ -21,7 +25,7 @@ export default function Categories() {
   return (
     <div className="page">
       <div className="page-header">
-        <h2 className="page-title">Categories</h2>
+        <h2 className="page-title">{tr.categories}</h2>
         <span className="page-count">{contacts.length}</span>
       </div>
 
@@ -36,7 +40,7 @@ export default function Categories() {
               <div className="cat-section-header" onClick={() => setOpen(isOpen ? null : cat)}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div className="cat-dot" style={{ background: accent }} />
-                  <span className="cat-section-name">{cat}</span>
+                  <span className="cat-section-name">{tr[cat.toLowerCase()] || cat}</span>
                   <span className="cat-section-count" style={{ color: accent }}>{group.length}</span>
                 </div>
                 <span className="cat-chevron" style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
@@ -45,7 +49,7 @@ export default function Categories() {
               {isOpen && (
                 <div className="cat-section-list">
                   {group.length === 0 ? (
-                    <div className="cat-empty">No contacts in this category</div>
+                    <div className="cat-empty">{tr.noContactsInCat}</div>
                   ) : (
                     group.map((c) => (
                       <div key={c.id} className="contact-item" onClick={() => navigate(`/contacts/${c.id}`)}>
