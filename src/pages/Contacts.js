@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { API, todayKey, Avatar, CATEGORIES, getUser } from "../components/shared";
+import { API, todayKey, Avatar, CATEGORIES, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
 import { t } from "../context/translations";
 
-function EditModal({ contact, onSave, onClose, tr }) {
+function EditModal({ contact, onSave, onClose, tr, userRole }) {
   const [name, setName]         = useState(contact.name);
   const [phone, setPhone]       = useState(contact.phone);
   const [category, setCategory] = useState(contact.category || "Other");
+  const [visibility, setVisibility] = useState(contact.visibility || 4);
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -19,14 +20,24 @@ function EditModal({ contact, onSave, onClose, tr }) {
         <div className="input-wrap"><span className="input-icon">📞</span>
           <input className="app-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={tr.phoneNumber} />
         </div>
-        <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🏷️</span>
+        <div className="input-wrap"><span className="input-icon">🏷️</span>
           <select className="app-input" value={category} onChange={(e) => setCategory(e.target.value)}>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
+        {(userRole === 1 || userRole === 2) && (
+          <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🔒</span>
+            <select className="app-input" value={visibility} onChange={(e) => setVisibility(Number(e.target.value))}>
+              <option value={1}>{tr.visibility1}</option>
+              <option value={2}>{tr.visibility2}</option>
+              <option value={3}>{tr.visibility3}</option>
+              <option value={4}>{tr.visibility4}</option>
+            </select>
+          </div>
+        )}
         <div className="modal-btns">
           <button className="btn-cancel" onClick={onClose}>{tr.cancel}</button>
-          <button className="btn-save" onClick={() => name.trim() && phone.trim() && onSave({ ...contact, name: name.trim(), phone: phone.trim(), category })}>
+          <button className="btn-save" onClick={() => name.trim() && phone.trim() && onSave({ ...contact, name: name.trim(), phone: phone.trim(), category, visibility })}>
             {tr.saveChanges}
           </button>
         </div>
@@ -41,19 +52,25 @@ export default function Contacts() {
   const [name, setName]             = useState("");
   const [phone, setPhone]           = useState("");
   const [category, setCategory]     = useState("Other");
+  const [visibility, setVisibility] = useState(4);
   const [nameErr, setNameErr]       = useState(false);
   const [phoneErr, setPhoneErr]     = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [newIds, setNewIds]         = useState(new Set());
   const [userId, setUserId]         = useState(null);
+  const [userRole, setUserRole]     = useState(4);
   const phoneRef = useRef();
   const navigate = useNavigate();
   const { lang } = useSettings();
   const tr = t[lang];
 
   useEffect(() => {
-    getUser().then((u) => {
-      if (u) { setUserId(u.id); fetchContacts(u.id); }
+    getUserProfile().then((u) => {
+      if (u) {
+        setUserId(u.id);
+        setUserRole(u.role || 4);
+        fetchContacts(u.id);
+      }
     });
   }, []);
 
@@ -75,10 +92,10 @@ export default function Contacts() {
     if (err) return;
     const res = await fetch(`${API}/contacts`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: n, phone: p, category, date: todayKey, user_id: userId }),
+      body: JSON.stringify({ name: n, phone: p, category, date: todayKey, user_id: userId, visibility }),
     });
     const created = await res.json();
-    setName(""); setPhone(""); setCategory("Other");
+    setName(""); setPhone(""); setCategory("Other"); setVisibility(4);
     setNewIds((prev) => new Set([...prev, created.id]));
     setTimeout(() => setNewIds((prev) => { const s = new Set(prev); s.delete(created.id); return s; }), 2500);
     fetchContacts(userId);
@@ -105,23 +122,33 @@ export default function Contacts() {
         <span className="page-count">{contacts.length}</span>
       </div>
 
-      <div className="panel">
-        <div className="panel-label">{tr.addNew}</div>
-        <div className="input-wrap"><span className="input-icon">👤</span>
-          <input className={`app-input ${nameErr ? "input-err" : ""}`} placeholder={tr.fullName} value={name}
-            onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && phoneRef.current?.focus()} />
+      {(userRole === 1 || userRole === 2) && (
+        <div className="panel">
+          <div className="panel-label">{tr.addNew}</div>
+          <div className="input-wrap"><span className="input-icon">👤</span>
+            <input className={`app-input ${nameErr ? "input-err" : ""}`} placeholder={tr.fullName} value={name}
+              onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && phoneRef.current?.focus()} />
+          </div>
+          <div className="input-wrap"><span className="input-icon">📞</span>
+            <input ref={phoneRef} className={`app-input ${phoneErr ? "input-err" : ""}`} placeholder={tr.phoneNumber} value={phone}
+              onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addContact()} />
+          </div>
+          <div className="input-wrap"><span className="input-icon">🏷️</span>
+            <select className="app-input" value={category} onChange={(e) => setCategory(e.target.value)}>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="input-wrap"><span className="input-icon">🔒</span>
+            <select className="app-input" value={visibility} onChange={(e) => setVisibility(Number(e.target.value))}>
+              <option value={1}>{tr.visibility1}</option>
+              <option value={2}>{tr.visibility2}</option>
+              <option value={3}>{tr.visibility3}</option>
+              <option value={4}>{tr.visibility4}</option>
+            </select>
+          </div>
+          <button className="btn-add" onClick={addContact}>{tr.addContact}</button>
         </div>
-        <div className="input-wrap"><span className="input-icon">📞</span>
-          <input ref={phoneRef} className={`app-input ${phoneErr ? "input-err" : ""}`} placeholder={tr.phoneNumber} value={phone}
-            onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addContact()} />
-        </div>
-        <div className="input-wrap"><span className="input-icon">🏷️</span>
-          <select className="app-input" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <button className="btn-add" onClick={addContact}>{tr.addContact}</button>
-      </div>
+      )}
 
       {loading ? (
         <div className="page-loading"><div className="spinner" /></div>
@@ -138,16 +165,18 @@ export default function Contacts() {
                   <div className="contact-phone">{c.phone}</div>
                 </div>
               </div>
-              <div className="actions">
-                <button className="btn-icon btn-edit" onClick={() => setEditTarget(c)}>✎</button>
-                <button className="btn-icon btn-del" onClick={() => deleteContact(c.id)}>✕</button>
-              </div>
+              {(userRole === 1 || userRole === 2) && (
+                <div className="actions">
+                  <button className="btn-icon btn-edit" onClick={() => setEditTarget(c)}>✎</button>
+                  <button className="btn-icon btn-del" onClick={() => deleteContact(c.id)}>✕</button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {editTarget && <EditModal contact={editTarget} onSave={saveEdit} onClose={() => setEditTarget(null)} tr={tr} />}
+      {editTarget && <EditModal contact={editTarget} onSave={saveEdit} onClose={() => setEditTarget(null)} tr={tr} userRole={userRole} />}
     </div>
   );
 }

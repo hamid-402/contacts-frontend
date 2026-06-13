@@ -48,3 +48,11 @@ export const getUser = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   return user || null;
 };
+
+export const getUserProfile = async () => {
+  const user = await getUser();
+  if (!user) return null;
+  const res = await fetch(`${API}/profile/${user.id}`);
+  const profile = await res.json();
+  return { ...user, ...profile };
+};

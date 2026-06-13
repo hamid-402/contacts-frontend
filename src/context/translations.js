@@ -42,6 +42,13 @@ export const t = {
     other: "سایر",
     noContactsInCat: "مخاطبی در این دسته‌بندی وجود ندارد",
 
+    // Visibility
+    visibilityLabel: "سطح دسترسی",
+    visibility1: "محرمانه (فقط مدیران)",
+    visibility2: "نیمه محرمانه",
+    visibility3: "عمومی شرکت",
+    visibility4: "همه",
+
     // Contact Detail
     back: "‹ بازگشت",
     phone: "تلفن",
@@ -133,5 +140,11 @@ export const t = {
     hasAccount: "Already have an account?",
     passwordMismatch: "Passwords don't match",
     passwordShort: "Password must be at least 6 characters",
+     // Visibility
+    visibilityLabel: "Access Level",
+    visibility1: "Confidential (Managers only)",
+    visibility2: "Semi-confidential",
+    visibility3: "Company-wide",
+    visibility4: "Everyone",
   },
 };
