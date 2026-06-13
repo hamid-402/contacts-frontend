@@ -12,6 +12,7 @@ import ContactDetail from "./pages/ContactDetail";
 import Categories from "./pages/Categories";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Admin from "./pages/Admin";
 
 function PrivateRoute({ children, user }) {
   return user ? children : <Navigate to="/login" />;
@@ -52,6 +53,7 @@ export default function App() {
                 <Route path="/contacts/:id" element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
                 <Route path="/search"       element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
                 <Route path="/categories"   element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
+                <Route path="/admin"        element={<PrivateRoute user={user}><Admin /></PrivateRoute>} />
               </Routes>
             </main>
           </div>

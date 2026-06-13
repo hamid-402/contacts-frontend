@@ -994,3 +994,34 @@
   .nav-label { display: none; }
   .app-main { padding-bottom: 70px; }
 }
+
+/* ── Admin panel ── */
+.role-select {
+  background: #07100a;
+  border: 0.5px solid #162a1e;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #b8dcc8;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+
+.role-select:focus { border-color: #00d98b44; }
+
+.auth-success {
+  background: #0a2018;
+  border: 0.5px solid #00d98b33;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #00d98b;
+}
+
+[data-theme="light"] .role-select {
+  background: #f5faf7;
+  border-color: #d0e4d8;
+  color: #0a1f14;
+}

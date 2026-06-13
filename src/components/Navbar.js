@@ -2,11 +2,20 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import { useSettings } from "../context/SettingsContext";
 import { t } from "../context/translations";
+import { useState, useEffect } from "react";
+import { getUserProfile } from "./shared";
 
 export default function Navbar({ user }) {
   const navigate = useNavigate();
   const { lang } = useSettings();
   const tr = t[lang];
+  const [userRole, setUserRole] = useState(4);
+
+  useEffect(() => {
+    getUserProfile().then((u) => {
+      if (u) setUserRole(u.role || 4);
+    });
+  }, []);
 
   const links = [
     { to: "/",           icon: "⊞", label: tr.home       },
@@ -34,6 +43,16 @@ export default function Navbar({ user }) {
             <span className="nav-label">{l.label}</span>
           </NavLink>
         ))}
+
+        {userRole === 1 && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `nav-link ${isActive ? "nav-active" : ""}`}
+          >
+            <span className="nav-icon">⚙️</span>
+            <span className="nav-label">مدیریت</span>
+          </NavLink>
+        )}
       </div>
 
       <div className="navbar-bottom">
