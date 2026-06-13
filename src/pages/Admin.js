@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
-import { t } from "../context/translations";
 import { supabase } from "../supabase";
 
 export default function Admin() {
@@ -16,7 +15,6 @@ export default function Admin() {
   const [adding, setAdding]       = useState(false);
   const [error, setError]         = useState("");
   const [success, setSuccess]     = useState("");
-  const { lang } = useSettings();
   
 
   useEffect(() => {
