@@ -157,10 +157,10 @@ export default function Admin() {
             <div className="actions">
               <select className="role-select" value={u.role}
                 onChange={(e) => updateRole(u.id, e.target.value, u.full_name)}>
-                <option value={1}>سطح ۱</option>
-                <option value={2}>سطح ۲</option>
-                <option value={3}>سطح ۳</option>
-                <option value={4}>سطح ۴</option>
+                <option value={1}>مدیر ارشد</option>
+                <option value={2}>مدیر</option>
+                <option value={3}>کارمند</option>
+                <option value={4}>کاربر عادی</option>
               </select>
               {u.id !== userId && (
                 <button className="btn-icon btn-del" onClick={() => deleteUser(u.id)}>✕</button>
