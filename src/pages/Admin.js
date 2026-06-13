@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
-import { useSettings } from "../context/SettingsContext";
 import { supabase } from "../supabase";
 
 export default function Admin() {
-  const [users, setUsers]         = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [userId, setUserId]       = useState(null);
-  const [userRole, setUserRole]   = useState(null);
-  const [email, setEmail]         = useState("");
-  const [fullName, setFullName]   = useState("");
-  const [password, setPassword]   = useState("");
-  const [role, setRole]           = useState(4);
-  const [adding, setAdding]       = useState(false);
-  const [error, setError]         = useState("");
-  const [success, setSuccess]     = useState("");
-  
+  const [users, setUsers]       = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [userId, setUserId]     = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [email, setEmail]       = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole]         = useState(4);
+  const [adding, setAdding]     = useState(false);
+  const [error, setError]       = useState("");
+  const [success, setSuccess]   = useState("");
 
   useEffect(() => {
     getUserProfile().then((u) => {
@@ -46,16 +44,13 @@ export default function Admin() {
     }
     setAdding(true);
     try {
-      // ساخت کاربر توی Supabase
       const { data, error: signUpError } = await supabase.auth.admin.createUser({
         email: email.trim(),
         password: password.trim(),
         email_confirm: true,
       });
-
       if (signUpError) throw signUpError;
 
-      // اضافه کردن پروفایل
       await fetch(`${API}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,19 +102,8 @@ export default function Admin() {
     </div>
   );
 
-  const roleLabels = {
-    1: "مدیر ارشد",
-    2: "مدیر",
-    3: "کارمند",
-    4: "کاربر عادی",
-  };
-
-  const roleColors = {
-    1: "#e06060",
-    2: "#4ab8e0",
-    3: "#00d98b",
-    4: "#7c6fcd",
-  };
+  const roleLabels = { 1: "مدیر ارشد", 2: "مدیر", 3: "کارمند", 4: "کاربر عادی" };
+  const roleColors = { 1: "#e06060", 2: "#4ab8e0", 3: "#00d98b", 4: "#7c6fcd" };
 
   return (
     <div className="page">
@@ -128,13 +112,10 @@ export default function Admin() {
         <span className="page-count">{users.length} کاربر</span>
       </div>
 
-      {/* فرم اضافه کردن کاربر */}
       <div className="panel">
         <div className="panel-label">افزودن کاربر جدید</div>
-
         {error && <div className="auth-error" style={{ marginBottom: 12 }}>{error}</div>}
         {success && <div className="auth-success" style={{ marginBottom: 12 }}>{success}</div>}
-
         <div className="input-wrap"><span className="input-icon">👤</span>
           <input className="app-input" placeholder="نام و نام خانوادگی" value={fullName}
             onChange={(e) => setFullName(e.target.value)} />
@@ -160,7 +141,6 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* لیست کاربران */}
       <div className="section-title">کاربران سیستم</div>
       <div className="contact-list">
         {users.map((u) => (
@@ -175,11 +155,8 @@ export default function Admin() {
               <div className="contact-phone">{u.email}</div>
             </div>
             <div className="actions">
-              <select
-                className="role-select"
-                value={u.role}
-                onChange={(e) => updateRole(u.id, e.target.value, u.full_name)}
-              >
+              <select className="role-select" value={u.role}
+                onChange={(e) => updateRole(u.id, e.target.value, u.full_name)}>
                 <option value={1}>سطح ۱</option>
                 <option value={2}>سطح ۲</option>
                 <option value={3}>سطح ۳</option>
