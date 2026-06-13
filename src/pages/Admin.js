@@ -17,7 +17,7 @@ export default function Admin() {
   const [error, setError]         = useState("");
   const [success, setSuccess]     = useState("");
   const { lang } = useSettings();
-  const tr = t[lang];
+  
 
   useEffect(() => {
     getUserProfile().then((u) => {
