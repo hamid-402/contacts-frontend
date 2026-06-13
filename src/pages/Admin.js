@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
-import { supabase } from "../supabase";
 
 export default function Admin() {
   const [users, setUsers]       = useState([]);
@@ -44,25 +43,19 @@ export default function Admin() {
     }
     setAdding(true);
     try {
-      const { data, error: signUpError } = await supabase.auth.admin.createUser({
-        email: email.trim(),
-        password: password.trim(),
-        email_confirm: true,
-      });
-      if (signUpError) throw signUpError;
-
-      await fetch(`${API}/users`, {
+      const res = await fetch(`${API}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           admin_id: userId,
-          user_id: data.user.id,
           email: email.trim(),
           full_name: fullName.trim(),
+          password: password.trim(),
           role: Number(role),
         }),
       });
-
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setEmail(""); setPassword(""); setFullName(""); setRole(4);
       setSuccess("کاربر با موفقیت اضافه شد");
       fetchUsers(userId);
