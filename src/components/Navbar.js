@@ -44,6 +44,14 @@ export default function Navbar({ user }) {
           </NavLink>
         ))}
 
+        <NavLink
+          to="/profile"
+          className={({ isActive }) => `nav-link ${isActive ? "nav-active" : ""}`}
+        >
+          <span className="nav-icon">👤</span>
+          <span className="nav-label">پروفایل</span>
+        </NavLink>
+
         {userRole === 1 && (
           <NavLink
             to="/admin"
