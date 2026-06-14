@@ -25,7 +25,7 @@ function EditModal({ contact, onSave, onClose, tr, userRole }) {
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        {(userRole === 1 || userRole === 2) && (
+        {userRole === 1 && (
           <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🔒</span>
             <select className="app-input" value={visibility} onChange={(e) => setVisibility(Number(e.target.value))}>
               <option value={1}>{tr.visibility1}</option>
@@ -122,7 +122,7 @@ export default function Contacts() {
         <span className="page-count">{contacts.length}</span>
       </div>
 
-      {(userRole === 1 || userRole === 2) && (
+      {(userRole === 1 ) && (
         <div className="panel">
           <div className="panel-label">{tr.addNew}</div>
           <div className="input-wrap"><span className="input-icon">👤</span>
@@ -165,7 +165,7 @@ export default function Contacts() {
                   <div className="contact-phone">{c.phone}</div>
                 </div>
               </div>
-              {(userRole === 1 || userRole === 2) && (
+              {(userRole === 1 ) && (
                 <div className="actions">
                   <button className="btn-icon btn-edit" onClick={() => setEditTarget(c)}>✎</button>
                   <button className="btn-icon btn-del" onClick={() => deleteContact(c.id)}>✕</button>
