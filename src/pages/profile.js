@@ -16,7 +16,6 @@ export default function Profile() {
   const [success, setSuccess]     = useState("");
   const [error, setError]         = useState("");
   const { lang } = useSettings();
-  const tr = t[lang];
 
   useEffect(() => {
     getUserProfile().then((u) => {
