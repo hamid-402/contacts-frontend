@@ -7,6 +7,7 @@ import { getUserProfile } from "./shared";
 export default function Navbar({ user }) {
   const navigate = useNavigate();
   const { lang } = useSettings();
+  const tr = t[lang];
   const [userRole, setUserRole] = useState(4);
 
   useEffect(() => {
