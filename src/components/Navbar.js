@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import { useSettings } from "../context/SettingsContext";
+import { t } from "../context/translations";
 import { useState, useEffect } from "react";
 import { getUserProfile } from "./shared";
 
