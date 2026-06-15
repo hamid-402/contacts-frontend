@@ -6,9 +6,13 @@ import { useSettings } from "../context/SettingsContext";
 function toShamsi(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat('fa-IR', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit',
+    calendar: 'persian'
+  }).format(date);
 }
-
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
   const [loading, setLoading]         = useState(true);
