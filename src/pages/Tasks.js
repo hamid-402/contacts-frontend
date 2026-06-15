@@ -1,20 +1,8 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
-
-// تبدیل تاریخ میلادی به شمسی
-function toShamsi(dateStr) {
-  if (!dateStr) return "";
-  try {
-    const date = new Date(dateStr);
-    const y = date.toLocaleDateString('fa-IR', { year: 'numeric', calendar: 'persian' });
-    const m = date.toLocaleDateString('fa-IR', { month: '2-digit', calendar: 'persian' });
-    const d = date.toLocaleDateString('fa-IR', { day: '2-digit', calendar: 'persian' });
-    return `${y}/${m}/${d}`;
-  } catch {
-    return dateStr;
-  }
-}
+import DatePicker from "react-persian-datepicker";
+import "react-persian-datepicker/dist/index.css";
 
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
@@ -157,16 +145,22 @@ export default function Tasks() {
               <option value={3}>🟢 کم اهمیت</option>
             </select>
           </div>
-          <div className="input-wrap"><span className="input-icon">📅</span>
-            <input className="app-input" type="date" value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)} />
+          <div className="input-wrap" style={{ marginBottom: 0 }}>
+            <span className="input-icon">📅</span>
+            <DatePicker
+              value={dueDate}
+              onChange={(val) => setDueDate(val)}
+              inputPlaceholder="انتخاب تاریخ شمسی"
+              shouldHighlightWeekends
+              inputClassName="app-input"
+            />
           </div>
-          <div className="input-wrap"><span className="input-icon">🕐</span>
-            <input className="app-input" type="time" value={startTime} placeholder="ساعت شروع"
+          <div className="input-wrap" style={{ marginTop: 10 }}><span className="input-icon">🕐</span>
+            <input className="app-input" type="time" value={startTime}
               onChange={(e) => setStartTime(e.target.value)} />
           </div>
           <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🕔</span>
-            <input className="app-input" type="time" value={endTime} placeholder="ساعت پایان"
+            <input className="app-input" type="time" value={endTime}
               onChange={(e) => setEndTime(e.target.value)} />
           </div>
           <button className="btn-add" style={{ marginTop: 12 }} onClick={addTask}>+ اضافه کن</button>
@@ -206,7 +200,7 @@ export default function Tasks() {
                   </div>
                   {task.description && <div className="contact-phone">{task.description}</div>}
                   <div className="contact-phone" style={{ display: "flex", gap: 12, marginTop: 2 }}>
-                    {task.due_date && <span>📅 {toShamsi(task.due_date)}</span>}
+                    {task.due_date && <span>📅 {task.due_date}</span>}
                     {task.start_time && task.end_time && <span>🕐 {task.start_time.slice(0,5)} تا {task.end_time.slice(0,5)}</span>}
                     {task.start_time && !task.end_time && <span>🕐 از {task.start_time.slice(0,5)}</span>}
                   </div>
@@ -243,9 +237,14 @@ export default function Tasks() {
                 <option value={3}>🟢 کم اهمیت</option>
               </select>
             </div>
-            <div className="input-wrap"><span className="input-icon">📅</span>
-              <input className="app-input" type="date" value={editTarget.due_date ? editTarget.due_date.split('T')[0] : ""}
-                onChange={(e) => setEditTarget({ ...editTarget, due_date: e.target.value })} />
+            <div className="input-wrap">
+              <span className="input-icon">📅</span>
+              <DatePicker
+                value={editTarget.due_date || ""}
+                onChange={(val) => setEditTarget({ ...editTarget, due_date: val })}
+                inputPlaceholder="انتخاب تاریخ"
+                inputClassName="app-input"
+              />
             </div>
             <div className="input-wrap"><span className="input-icon">🕐</span>
               <input className="app-input" type="time" value={editTarget.start_time ? editTarget.start_time.slice(0,5) : ""}
