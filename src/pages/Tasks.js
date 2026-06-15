@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
+import PersianDatePicker from "../components/PersianDatePicker";
 
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
@@ -140,8 +141,7 @@ export default function Tasks() {
             </select>
           </div>
           <div className="input-wrap"><span className="input-icon">📅</span>
-            <input className="app-input" type="text" placeholder="تاریخ شمسی — مثال: ۱۴۰۵/۰۳/۲۵" value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)} />
+            <PersianDatePicker value={dueDate} onChange={setDueDate} placeholder="انتخاب تاریخ شمسی" />
           </div>
           <div className="input-wrap"><span className="input-icon">🕐</span>
             <input className="app-input" type="time" value={startTime}
@@ -219,9 +219,7 @@ export default function Tasks() {
               </select>
             </div>
             <div className="input-wrap"><span className="input-icon">📅</span>
-              <input className="app-input" type="text" placeholder="تاریخ شمسی — مثال: ۱۴۰۵/۰۳/۲۵"
-                value={editTarget.due_date || ""}
-                onChange={(e) => setEditTarget({ ...editTarget, due_date: e.target.value })} />
+              <PersianDatePicker value={editTarget.due_date || ""} onChange={(val) => setEditTarget({ ...editTarget, due_date: val })} placeholder="انتخاب تاریخ" />
             </div>
             <div className="input-wrap"><span className="input-icon">🕐</span>
               <input className="app-input" type="time" value={editTarget.start_time ? editTarget.start_time.slice(0,5) : ""}
