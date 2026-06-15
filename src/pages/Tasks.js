@@ -6,13 +6,18 @@ import { useSettings } from "../context/SettingsContext";
 function toShamsi(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('fa-IR', { 
-    year: 'numeric', 
+  const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
     month: '2-digit', 
     day: '2-digit',
-    calendar: 'persian'
-  }).format(date);
+  });
+  const parts = formatter.formatToParts(date);
+  const y = parts.find(p => p.type === 'year')?.value;
+  const m = parts.find(p => p.type === 'month')?.value;
+  const d = parts.find(p => p.type === 'day')?.value;
+  return `${y}/${m}/${d}`;
 }
+
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
   const [loading, setLoading]         = useState(true);
