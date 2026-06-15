@@ -5,17 +5,20 @@ import { useSettings } from "../context/SettingsContext";
 // تبدیل تاریخ میلادی به شمسی
 function toShamsi(dateStr) {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  const formatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
-    year: 'numeric',
-    month: '2-digit', 
-    day: '2-digit',
-  });
-  const parts = formatter.formatToParts(date);
-  const y = parts.find(p => p.type === 'year')?.value;
-  const m = parts.find(p => p.type === 'month')?.value;
-  const d = parts.find(p => p.type === 'day')?.value;
-  return `${y}/${m}/${d}`;
+  try {
+    const date = new Date(dateStr);
+    const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    const y = parts.find(p => p.type === 'year')?.value;
+    const m = parts.find(p => p.type === 'month')?.value;
+    const d = parts.find(p => p.type === 'day')?.value;
+    return `${y}/${m}/${d}`;
+  } catch {
+    return dateStr;
+  }
 }
 
 export default function Tasks() {
