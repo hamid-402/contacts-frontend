@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
-import { DatePicker } from "react-persian-datepicker";
 
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
@@ -101,7 +100,6 @@ export default function Tasks() {
         <span className="page-count">{pendingCount} باقیمانده</span>
       </div>
 
-      {/* آمار */}
       <div className="stats-grid" style={{ marginBottom: 16 }}>
         <div className="stat-card">
           <div className="stat-num" style={{ color: "#d4a017" }}>{pendingCount}</div>
@@ -113,19 +111,16 @@ export default function Tasks() {
         </div>
       </div>
 
-      {/* فیلتر */}
       <div className="filter-pills" style={{ marginBottom: 16 }}>
         <button className={`pill ${filter === "all" ? "pill-active" : ""}`} onClick={() => setFilter("all")}>همه</button>
         <button className={`pill ${filter === "pending" ? "pill-active" : ""}`} onClick={() => setFilter("pending")}>در انتظار</button>
         <button className={`pill ${filter === "done" ? "pill-active" : ""}`} onClick={() => setFilter("done")}>انجام شده</button>
       </div>
 
-      {/* دکمه اضافه کردن */}
       <button className="btn-add" style={{ marginBottom: 16 }} onClick={() => setShowForm(!showForm)}>
         {showForm ? "انصراف" : "+ وظیفه جدید"}
       </button>
 
-      {/* فرم اضافه کردن */}
       {showForm && (
         <div className="panel" style={{ marginBottom: 16 }}>
           <div className="panel-label">وظیفه جدید</div>
@@ -144,17 +139,11 @@ export default function Tasks() {
               <option value={3}>🟢 کم اهمیت</option>
             </select>
           </div>
-          <div className="input-wrap" style={{ marginBottom: 0 }}>
-            <span className="input-icon">📅</span>
-            <DatePicker
-              value={dueDate}
-              onChange={(val) => setDueDate(val)}
-              inputPlaceholder="انتخاب تاریخ شمسی"
-              shouldHighlightWeekends
-              inputClassName="app-input"
-            />
+          <div className="input-wrap"><span className="input-icon">📅</span>
+            <input className="app-input" type="text" placeholder="تاریخ شمسی — مثال: ۱۴۰۵/۰۳/۲۵" value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)} />
           </div>
-          <div className="input-wrap" style={{ marginTop: 10 }}><span className="input-icon">🕐</span>
+          <div className="input-wrap"><span className="input-icon">🕐</span>
             <input className="app-input" type="time" value={startTime}
               onChange={(e) => setStartTime(e.target.value)} />
           </div>
@@ -166,7 +155,6 @@ export default function Tasks() {
         </div>
       )}
 
-      {/* لیست وظایف */}
       {filtered.length === 0 ? (
         <div className="empty-state"><div className="empty-icon">✅</div><p>وظیفه‌ای وجود ندارد</p></div>
       ) : (
@@ -174,19 +162,15 @@ export default function Tasks() {
           {filtered.map((task) => (
             <div key={task.id} className="contact-item" style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
-                <button
-                  onClick={() => toggleStatus(task)}
-                  style={{
+                <button onClick={() => toggleStatus(task)} style={{
                     width: 24, height: 24, borderRadius: 6, flexShrink: 0,
                     border: `1.5px solid ${task.status === "done" ? "#00d98b" : "#2e4d3c"}`,
                     background: task.status === "done" ? "#00d98b" : "transparent",
                     cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#001a10", fontSize: 13, transition: "all .15s"
-                  }}
-                >
+                  }}>
                   {task.status === "done" ? "✓" : ""}
                 </button>
-
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="contact-name" style={{
                     textDecoration: task.status === "done" ? "line-through" : "none",
@@ -204,7 +188,6 @@ export default function Tasks() {
                     {task.start_time && !task.end_time && <span>🕐 از {task.start_time.slice(0,5)}</span>}
                   </div>
                 </div>
-
                 <div className="actions">
                   <button className="btn-icon btn-edit" onClick={() => setEditTarget(task)}>✎</button>
                   <button className="btn-icon btn-del" onClick={() => deleteTask(task.id)}>✕</button>
@@ -215,7 +198,6 @@ export default function Tasks() {
         </div>
       )}
 
-      {/* مودال ویرایش */}
       {editTarget && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setEditTarget(null)}>
           <div className="modal">
@@ -236,14 +218,10 @@ export default function Tasks() {
                 <option value={3}>🟢 کم اهمیت</option>
               </select>
             </div>
-            <div className="input-wrap">
-              <span className="input-icon">📅</span>
-              <DatePicker
+            <div className="input-wrap"><span className="input-icon">📅</span>
+              <input className="app-input" type="text" placeholder="تاریخ شمسی — مثال: ۱۴۰۵/۰۳/۲۵"
                 value={editTarget.due_date || ""}
-                onChange={(val) => setEditTarget({ ...editTarget, due_date: val })}
-                inputPlaceholder="انتخاب تاریخ"
-                inputClassName="app-input"
-              />
+                onChange={(e) => setEditTarget({ ...editTarget, due_date: e.target.value })} />
             </div>
             <div className="input-wrap"><span className="input-icon">🕐</span>
               <input className="app-input" type="time" value={editTarget.start_time ? editTarget.start_time.slice(0,5) : ""}
