@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import jalaali from "jalaali-js";
-import PersianDatePicker from "../components/PersianDatePicker";
 
 const MONTHS = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const DAYS = ["ش","ی","د","س","چ","پ","ج"];
@@ -25,6 +24,8 @@ export default function Calendar() {
   const [loading, setLoading]   = useState(true);
   const [showAddTask, setShowAddTask]   = useState(false);
   const [showAddEvent, setShowAddEvent] = useState(false);
+  const [editTask, setEditTask]   = useState(null);
+  const [editEvent, setEditEvent] = useState(null);
 
   // فرم وظیفه
   const [taskTitle, setTaskTitle]       = useState("");
@@ -114,6 +115,26 @@ export default function Calendar() {
 
   const deleteEvent = async (id) => {
     await fetch(`${API}/events/${id}`, { method: "DELETE" });
+    fetchAll(userId);
+  };
+
+  const saveEditTask = async () => {
+    await fetch(`${API}/tasks/${editTask.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editTask),
+    });
+    setEditTask(null);
+    fetchAll(userId);
+  };
+
+  const saveEditEvent = async () => {
+    await fetch(`${API}/events/${editEvent.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editEvent),
+    });
+    setEditEvent(null);
     fetchAll(userId);
   };
 
@@ -329,7 +350,10 @@ export default function Calendar() {
                   </div>
                   {task.start_time && <div className="contact-phone">🕐 {task.start_time.slice(0,5)}{task.end_time ? ` تا ${task.end_time.slice(0,5)}` : ""}</div>}
                 </div>
-                <button className="btn-icon btn-del" onClick={() => deleteTask(task.id)}>✕</button>
+                <div className="actions">
+                  <button className="btn-icon btn-edit" onClick={() => setEditTask(task)}>✎</button>
+                  <button className="btn-icon btn-del" onClick={() => deleteTask(task.id)}>✕</button>
+                </div>
               </div>
             ))}
           </div>
@@ -368,6 +392,78 @@ export default function Calendar() {
           <p>برنامه‌ای برای این روز ندارید</p>
         </div>
       )}
+
+      {/* Modal ویرایش وظیفه */}
+{editTask && (
+  <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setEditTask(null)}>
+    <div className="modal">
+      <h3 className="modal-title">ویرایش وظیفه</h3>
+      <div className="input-wrap"><span className="input-icon">📝</span>
+        <input className="app-input" value={editTask.title}
+          onChange={(e) => setEditTask({ ...editTask, title: e.target.value })} placeholder="عنوان" />
+      </div>
+      <div className="input-wrap"><span className="input-icon">⚡</span>
+        <select className="app-input" value={editTask.priority}
+          onChange={(e) => setEditTask({ ...editTask, priority: Number(e.target.value) })}>
+          <option value={1}>🔴 فوری</option>
+          <option value={2}>🟡 معمولی</option>
+          <option value={3}>🟢 کم اهمیت</option>
+        </select>
+      </div>
+      <div className="input-wrap"><span className="input-icon">🕐</span>
+        <input className="app-input" type="time" value={editTask.start_time ? editTask.start_time.slice(0,5) : ""}
+          onChange={(e) => setEditTask({ ...editTask, start_time: e.target.value })} />
+      </div>
+      <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🕔</span>
+        <input className="app-input" type="time" value={editTask.end_time ? editTask.end_time.slice(0,5) : ""}
+          onChange={(e) => setEditTask({ ...editTask, end_time: e.target.value })} />
+      </div>
+      <div className="modal-btns">
+        <button className="btn-cancel" onClick={() => setEditTask(null)}>انصراف</button>
+        <button className="btn-save" onClick={saveEditTask}>ذخیره</button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Modal ویرایش رویداد */}
+{editEvent && (
+  <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setEditEvent(null)}>
+    <div className="modal">
+      <h3 className="modal-title">ویرایش رویداد</h3>
+      <div className="input-wrap"><span className="input-icon">📌</span>
+        <input className="app-input" value={editEvent.title}
+          onChange={(e) => setEditEvent({ ...editEvent, title: e.target.value })} placeholder="عنوان" />
+      </div>
+      <div className="input-wrap"><span className="input-icon">📄</span>
+        <input className="app-input" value={editEvent.description || ""}
+          onChange={(e) => setEditEvent({ ...editEvent, description: e.target.value })} placeholder="توضیحات" />
+      </div>
+      <div className="input-wrap"><span className="input-icon">🏷️</span>
+        <select className="app-input" value={editEvent.type}
+          onChange={(e) => setEditEvent({ ...editEvent, type: e.target.value })}>
+          <option value="meeting">جلسه</option>
+          <option value="call">تماس</option>
+          <option value="reminder">یادآوری</option>
+          <option value="other">سایر</option>
+        </select>
+      </div>
+      <div className="input-wrap"><span className="input-icon">🕐</span>
+        <input className="app-input" type="time" value={editEvent.start_time ? editEvent.start_time.slice(0,5) : ""}
+          onChange={(e) => setEditEvent({ ...editEvent, start_time: e.target.value })} />
+      </div>
+      <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">🕔</span>
+        <input className="app-input" type="time" value={editEvent.end_time ? editEvent.end_time.slice(0,5) : ""}
+          onChange={(e) => setEditEvent({ ...editEvent, end_time: e.target.value })} />
+      </div>
+      <div className="modal-btns">
+        <button className="btn-cancel" onClick={() => setEditEvent(null)}>انصراف</button>
+        <button className="btn-save" onClick={saveEditEvent}>ذخیره</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
