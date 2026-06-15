@@ -2,46 +2,42 @@ import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { supabase } from "../supabase";
 import { useSettings } from "../context/SettingsContext";
-import { t } from "../context/translations";
 
 export default function Profile() {
-  const [userId, setUserId]       = useState(null);
-  const [fullName, setFullName]   = useState("");
-  const [phone, setPhone]         = useState("");
-  const [email, setEmail]         = useState("");
+  const [userId, setUserId]           = useState(null);
+  const [fullName, setFullName]       = useState("");
+  const [email, setEmail]             = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading]     = useState(true);
-  const [saving, setSaving]       = useState(false);
-  const [success, setSuccess]     = useState("");
-  const [error, setError]         = useState("");
+  const [loading, setLoading]         = useState(true);
+  const [saving, setSaving]           = useState(false);
+  const [success, setSuccess]         = useState("");
+  const [error, setError]             = useState("");
   const { lang } = useSettings();
-  const tr = t[lang];
 
   useEffect(() => {
     getUserProfile().then((u) => {
       if (u) {
         setUserId(u.id);
         setFullName(u.full_name || "");
-        setPhone(u.phone || "");
         setEmail(u.email || "");
         setLoading(false);
       }
     });
   }, []);
 
-  const saveProfile = async () => {
+  const saveName = async () => {
     setError(""); setSuccess("");
     setSaving(true);
     try {
       await fetch(`${API}/profile/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name: fullName, phone }),
+        body: JSON.stringify({ full_name: fullName, phone: "" }),
       });
-      setSuccess("پروفایل با موفقیت ذخیره شد");
+      setSuccess("نام با موفقیت ذخیره شد");
     } catch {
-      setError("خطا در ذخیره پروفایل");
+      setError("خطا در ذخیره نام");
     }
     setSaving(false);
   };
@@ -80,14 +76,11 @@ export default function Profile() {
         <div className="input-wrap"><span className="input-icon">✉️</span>
           <input className="app-input" value={email} disabled style={{ opacity: 0.5 }} placeholder="ایمیل" />
         </div>
-        <div className="input-wrap"><span className="input-icon">👤</span>
+        <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">👤</span>
           <input className="app-input" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="نام و نام خانوادگی" />
         </div>
-        <div className="input-wrap" style={{ marginBottom: 0 }}><span className="input-icon">📞</span>
-          <input className="app-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="شماره تلفن" />
-        </div>
-        <button className="btn-add" style={{ marginTop: 12 }} onClick={saveProfile} disabled={saving}>
-          {saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
+        <button className="btn-add" style={{ marginTop: 12 }} onClick={saveName} disabled={saving}>
+          {saving ? "در حال ذخیره..." : "ذخیره نام"}
         </button>
       </div>
 

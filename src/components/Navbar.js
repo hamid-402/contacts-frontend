@@ -22,6 +22,7 @@ export default function Navbar({ user }) {
     { to: "/contacts",   icon: "👥", label: tr.contacts   },
     { to: "/search",     icon: "🔍", label: tr.search     },
     { to: "/categories", icon: "🏷️", label: tr.categories },
+    { to: "/tasks",      icon: "✅", label: lang === "fa" ? "وظایف" : "Tasks" },
   ];
 
   const handleLogout = async () => {

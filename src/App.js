@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Tasks from "./pages/Tasks";
 
 function PrivateRoute({ children, user }) {
   return user ? children : <Navigate to="/login" />;
@@ -56,6 +57,7 @@ export default function App() {
                 <Route path="/categories"   element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
                 <Route path="/admin"        element={<PrivateRoute user={user}><Admin /></PrivateRoute>} />
                 <Route path="/profile" element={<PrivateRoute user={user}><Profile /></PrivateRoute>} />
+                <Route path="/tasks" element={<PrivateRoute user={user}><Tasks /></PrivateRoute>} />
               </Routes>
             </main>
           </div>
