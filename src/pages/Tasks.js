@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
 import DatePicker from "react-persian-datepicker";
-import "react-persian-datepicker/dist/index.css";
 
 export default function Tasks() {
   const [tasks, setTasks]             = useState([]);
