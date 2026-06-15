@@ -7,14 +7,9 @@ function toShamsi(dateStr) {
   if (!dateStr) return "";
   try {
     const date = new Date(dateStr);
-    const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).formatToParts(date);
-    const y = parts.find(p => p.type === 'year')?.value;
-    const m = parts.find(p => p.type === 'month')?.value;
-    const d = parts.find(p => p.type === 'day')?.value;
+    const y = date.toLocaleDateString('fa-IR', { year: 'numeric', calendar: 'persian' });
+    const m = date.toLocaleDateString('fa-IR', { month: '2-digit', calendar: 'persian' });
+    const d = date.toLocaleDateString('fa-IR', { day: '2-digit', calendar: 'persian' });
     return `${y}/${m}/${d}`;
   } catch {
     return dateStr;
