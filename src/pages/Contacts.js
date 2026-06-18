@@ -117,7 +117,6 @@ export default function Contacts() {
   const [newIds,      setNewIds]      = useState(new Set());
   const [userId,      setUserId]      = useState(null);
   const [userRole,    setUserRole]    = useState(4);
-  const [activeTab,   setActiveTab]   = useState("all");
   const [showForm,    setShowForm]    = useState(false);
   const phoneRef = useRef();
   const navigate = useNavigate();
@@ -181,15 +180,19 @@ export default function Contacts() {
     fetchContacts(userId);
   };
 
-  /* فیلتر بر اساس tab — از CATEGORIES جدید */
-  const tabs = [
-    { key: "all", label: lang === "fa" ? "همه" : "All" },
-    ...CATEGORIES.map(cat => ({ key: cat, label: cat })),
-  ];
+  const [search,      setSearch]      = useState("");
+  const [catFilter,   setCatFilter]   = useState("all");
+  const [visFilter,   setVisFilter]   = useState("all");
 
-  const filtered = activeTab === "all"
-    ? contacts
-    : contacts.filter((c) => c.category === activeTab);
+  /* فیلتر */
+  const filtered = contacts.filter(c => {
+    const matchSearch = !search ||
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search);
+    const matchCat = catFilter === "all" || c.category === catFilter;
+    const matchVis = visFilter === "all" || c.visibility === Number(visFilter);
+    return matchSearch && matchCat && matchVis;
+  });
 
   return (
     <div className="page">
@@ -263,23 +266,59 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* ── tabs فیلتر ── */}
-      <div className="tabs-row">
-        {tabs.map((tb) => (
-          <button
-            key={tb.key}
-            className={`tab-btn ${activeTab === tb.key ? "active" : ""}`}
-            onClick={() => setActiveTab(tb.key)}
-          >
-            {tb.label}
-            {tb.key !== "all" && (
-              <span style={{ marginRight: 4, opacity: .6, fontSize: 10 }}>
-                ({contacts.filter((c) => c.category === tb.key).length})
-              </span>
-            )}
-          </button>
-        ))}
+      {/* ── جستجو و فیلتر ── */}
+      <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
+        {/* جستجو */}
+        <div className="input-wrap" style={{ flex:2, minWidth:180, marginBottom:0 }}>
+          <span className="input-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input className="app-input"
+            placeholder={lang==="fa"?"جستجوی نام یا شماره...":"Search name or phone..."}
+            value={search} onChange={e=>setSearch(e.target.value)} />
+        </div>
+
+        {/* فیلتر بخش */}
+        <div style={{ flex:1, minWidth:140, position:"relative" }}>
+          <span className="input-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </span>
+          <select className="app-input" value={catFilter} onChange={e=>setCatFilter(e.target.value)}>
+            <option value="all">{lang==="fa"?"همه بخش‌ها":"All departments"}</option>
+            {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        {/* فیلتر visibility — فقط ادمین */}
+        {userRole===1&&(
+          <div style={{ flex:1, minWidth:140, position:"relative" }}>
+            <span className="input-icon">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+            <select className="app-input" value={visFilter} onChange={e=>setVisFilter(e.target.value)}>
+              <option value="all">{lang==="fa"?"همه سطوح":"All levels"}</option>
+              <option value="1">{lang==="fa"?"محرمانه":"Confidential"}</option>
+              <option value="2">{lang==="fa"?"نیمه محرمانه":"Semi-conf."}</option>
+              <option value="3">{lang==="fa"?"عمومی شرکت":"Company"}</option>
+              <option value="4">{lang==="fa"?"همه":"Everyone"}</option>
+            </select>
+          </div>
+        )}
       </div>
+
+      {/* نتیجه فیلتر */}
+      {(search||catFilter!=="all"||visFilter!=="all")&&(
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+          <span style={{ fontSize:12, color:"var(--text3)" }}>
+            {lang==="fa"?`${filtered.length} نتیجه`:`${filtered.length} results`}
+          </span>
+          <button onClick={()=>{setSearch("");setCatFilter("all");setVisFilter("all");}}
+            style={{ fontSize:11, color:"var(--accent)", background:"transparent", border:"none",
+              cursor:"pointer", fontFamily:"DM Sans,sans-serif" }}>
+            {lang==="fa"?"پاک کردن فیلتر":"Clear filters"}
+          </button>
+        </div>
+      )}
 
       {/* ── لیست ── */}
       {loading ? (
