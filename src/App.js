@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Tasks from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
 import Reports from "./pages/Reports";
+import Organizations from "./pages/Organizations";
 
 function PrivateRoute({ children, user }) {
   return user ? children : <Navigate to="/login" />;
@@ -60,6 +61,7 @@ export default function App() {
                 <Route path="/tasks"            element={<PrivateRoute user={user}><Tasks /></PrivateRoute>} />
                 <Route path="/calendar"         element={<PrivateRoute user={user}><Calendar /></PrivateRoute>} />
                 <Route path="/reports"          element={<PrivateRoute user={user}><Reports /></PrivateRoute>} />
+                <Route path="/organizations"    element={<PrivateRoute user={user}><Organizations /></PrivateRoute>} />
                 <Route path="/profile"          element={<PrivateRoute user={user}><Profile /></PrivateRoute>} />
                 <Route path="/admin"            element={<PrivateRoute user={user}><Admin /></PrivateRoute>} />
               </Routes>
