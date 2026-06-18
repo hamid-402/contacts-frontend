@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API, getUserProfile } from "../components/shared";
+import { API, getUserProfile, CATEGORIES } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
 
 const IconUser    = () => <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
@@ -94,6 +94,8 @@ export default function Admin() {
   const [password,   setPassword]   = useState("");
   const [role,       setRole]       = useState(4);
   const [visibility, setVisibility] = useState(4);
+  const [managerId,  setManagerId]  = useState("");
+  const [department, setDepartment] = useState("");
   const [adding,     setAdding]     = useState(false);
   const [error,      setError]      = useState("");
   const [success,    setSuccess]    = useState("");
@@ -124,6 +126,10 @@ export default function Admin() {
     unTaken:fa?"این نام کاربری قبلاً استفاده شده":"Username taken",
     unAvail:fa?"نام کاربری در دسترس است":"Username available",
     optional:fa?"(اختیاری)":"(optional)",
+    managerLabel:fa?"مدیر مستقیم":"Direct manager",
+    noManager:fa?"بدون مدیر مستقیم":"No manager",
+    deptLabel:fa?"بخش / تیم":"Department",
+    noDept:fa?"بدون بخش":"No department",
   };
 
   const roleLabels = { 1:txt.senior, 2:txt.manager, 3:txt.employee, 4:txt.user };
@@ -167,12 +173,13 @@ export default function Admin() {
         method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ admin_id:userId, email:email.trim(), full_name:fullName.trim(),
           username:username.trim().toLowerCase()||null, password:password.trim(),
-          phone:phone.trim()||null, role:Number(role), visibility:Number(visibility) }),
+          phone:phone.trim()||null, role:Number(role), visibility:Number(visibility),
+          manager_id: managerId || null, department: department || null }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setFullName(""); setUsername(""); setEmail(""); setPhone("");
-      setPassword(""); setRole(4); setVisibility(4); setUnCheck(null);
+      setPassword(""); setRole(4); setVisibility(4); setManagerId(""); setDepartment(""); setUnCheck(null);
       setSuccess(txt.addedOk); fetchUsers(userId);
     } catch (err) { setError(err.message||"Error"); }
     setAdding(false);
@@ -181,6 +188,18 @@ export default function Admin() {
   const updateRole = async (id, newRole, name) => {
     await fetch(`${API}/users/${id}`, { method:"PUT", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({admin_id:userId, role:Number(newRole), full_name:name}) });
+    fetchUsers(userId);
+  };
+
+  const updateManager = async (id, newManagerId, name, role) => {
+    await fetch(`${API}/users/${id}`, { method:"PUT", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({admin_id:userId, role:Number(role), full_name:name, manager_id:newManagerId||null}) });
+    fetchUsers(userId);
+  };
+
+  const updateDepartment = async (id, newDept, name, role, managerId) => {
+    await fetch(`${API}/users/${id}`, { method:"PUT", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({admin_id:userId, role:Number(role), full_name:name, manager_id:managerId||null, department:newDept||null}) });
     fetchUsers(userId);
   };
 
@@ -364,6 +383,24 @@ export default function Admin() {
                     <span>{u.email}</span>
                     {u.phone && <span>{u.phone}</span>}
                   </div>
+                  {/* مدیر مستقیم */}
+                  {u.manager_name && (
+                    <div style={{ fontSize:10, color:"var(--text3)", marginTop:3, display:"flex", alignItems:"center", gap:4 }}>
+                      <svg viewBox="0 0 24 24" style={{ width:10,height:10,stroke:"var(--text3)",fill:"none",strokeWidth:2 }}>
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      {fa?"مدیر:":"Manager:"} <span style={{ color:"var(--text2)" }}>{u.manager_name}</span>
+                    </div>
+                  )}
+                  {/* بخش */}
+                  {u.department && (
+                    <div style={{ fontSize:10, color:"var(--text3)", marginTop:2, display:"flex", alignItems:"center", gap:4 }}>
+                      <svg viewBox="0 0 24 24" style={{ width:10,height:10,stroke:"var(--text3)",fill:"none",strokeWidth:2 }}>
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      </svg>
+                      <span style={{ color:"var(--accent)" }}>{u.department}</span>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display:"flex",alignItems:"center",gap:6 }}>
                   <select className="role-select" value={u.role}
@@ -376,6 +413,35 @@ export default function Admin() {
                   )}
                 </div>
               </div>
+              {/* انتخاب بخش و مدیر مستقیم */}
+              {u.id !== userId && (
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
+                  <div>
+                    <div className="panel-label" style={{ marginBottom:4 }}>{txt.deptLabel}</div>
+                    <select className="app-input" style={{ paddingLeft:12 }}
+                      value={u.department || ""}
+                      onChange={(e) => updateDepartment(u.id, e.target.value, u.full_name, u.role, u.manager_id)}>
+                      <option value="">{txt.noDept}</option>
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {u.role >= 3 && (
+                    <div>
+                      <div className="panel-label" style={{ marginBottom:4 }}>{txt.managerLabel}</div>
+                      <select className="app-input" style={{ paddingLeft:12 }}
+                        value={u.manager_id || ""}
+                        onChange={(e) => updateManager(u.id, e.target.value, u.full_name, u.role)}>
+                        <option value="">{txt.noManager}</option>
+                        {users.filter(m => m.role <= 2 && m.id !== u.id).map(m => (
+                          <option key={m.id} value={m.id}>{m.full_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
               {u.id !== userId && <ResetPassword userId={u.id} adminId={userId} lang={lang}/>}
             </div>
           ))}
@@ -444,6 +510,38 @@ export default function Admin() {
                   <option value={3}>{txt.vis3}</option><option value={4}>{txt.vis4}</option>
                 </select>
               </div>
+            </div>
+          </div>
+
+          {/* مدیر مستقیم */}
+          <div style={{ marginTop:8 }}>
+            <div className="panel-label" style={{ marginBottom:5 }}>{txt.deptLabel} {txt.optional}</div>
+            <div style={{ position:"relative" }}>
+              <span className="input-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              </span>
+              <select className="app-input" value={department} onChange={(e)=>setDepartment(e.target.value)}>
+                <option value="">{txt.noDept}</option>
+                {CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* مدیر مستقیم */}
+          <div style={{ marginTop:8 }}>
+            <div className="panel-label" style={{ marginBottom:5 }}>{txt.managerLabel} {txt.optional}</div>
+            <div style={{ position:"relative" }}>
+              <span className="input-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <select className="app-input" value={managerId} onChange={(e)=>setManagerId(e.target.value)}>
+                <option value="">{txt.noManager}</option>
+                {users.filter(u => u.role <= 2).map(u => (
+                  <option key={u.id} value={u.id}>{u.full_name} ({roleLabels[u.role]})</option>
+                ))}
+              </select>
             </div>
           </div>
 
