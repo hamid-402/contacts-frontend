@@ -270,11 +270,10 @@ export default function Reports() {
 
   /* tabs */
   const tabs = [
-    { key:"personal", label:fa?"گزارش من":"My Report" },
+    { key:"personal",  label:fa?"گزارش من":"My Report" },
     ...(userRole===1?[{ key:"executive", label:fa?"داشبورد مدیریتی":"Executive" }]:[]),
     ...(userRole<=2?[{ key:"members",   label:fa?"اعضا":"Members" }]:[]),
     ...(userRole===1?[{ key:"depts",    label:fa?"بخش‌ها":"Departments" }]:[]),
-    ...(userRole===1?[{ key:"system",   label:fa?"سیستم":"System" }]:[]),
   ];
 
   return (
@@ -595,6 +594,49 @@ export default function Reports() {
                 onToggle={()=>setExpanded(p=>({...p,[u.id]:!p[u.id]}))}/>
             ))
           )}
+
+          {/* رتبه‌بندی کامل — فقط وقتی فیلتر "همه" هست */}
+          {memberFilter==="all" && userRole===1 && allUsers.length>0 && (
+            <div className="panel" style={{ marginTop:14 }}>
+              <div className="panel-label">{fa?"رتبه‌بندی کامل عملکرد":"Full performance ranking"}</div>
+              <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                {[...allUsers]
+                  .sort((a,b)=>b.performance.done_rate-a.performance.done_rate)
+                  .map((u,i)=>{
+                    const perfColor=u.performance.done_rate>=70?"var(--accent)":u.performance.done_rate>=40?"var(--amber)":"var(--red)";
+                    const medalColors=["var(--amber)","var(--text3)","#cd7f32"];
+                    return(
+                      <div key={u.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px",
+                        background:"var(--bg4)", borderRadius:"var(--radius-sm)" }}>
+                        <div style={{ width:22, height:22, borderRadius:"50%", flexShrink:0,
+                          background: i<3?`${medalColors[i]}22`:"var(--bg3)",
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          fontSize:11, fontWeight:800, color:i<3?medalColors[i]:"var(--text3)" }}>
+                          {i+1}
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:12, fontWeight:500, color:"var(--text1)",
+                            overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                            {u.full_name}
+                          </div>
+                          <div style={{ fontSize:10, color:"var(--text3)" }}>{u.department||""}</div>
+                        </div>
+                        {u.performance.overdue_tasks>0&&(
+                          <span style={{ fontSize:9, background:"var(--red)", color:"#fff",
+                            padding:"1px 5px", borderRadius:5, fontWeight:700, flexShrink:0 }}>
+                            {u.performance.overdue_tasks} {fa?"تاخیر":"late"}
+                          </span>
+                        )}
+                        <div style={{ fontSize:14, fontFamily:"Syne,sans-serif", fontWeight:800,
+                          color:perfColor, flexShrink:0, minWidth:38, textAlign:"center" }}>
+                          {fa?toFarsiNum(u.performance.done_rate):u.performance.done_rate}%
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -747,33 +789,6 @@ export default function Reports() {
               )}
             </>
           )}
-        </>
-      )}
-
-      {/* ══ گزارش سیستم ══ */}
-      {activeTab==="system" && userRole===1 && sys && (
-        <>
-          <div className="kpi-grid" style={{ marginBottom:14 }}>
-            <KPI icon={<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></>}
-              value={sys.total_contacts} label={fa?"کل مخاطبین":"Contacts"} color="var(--accent)"/>
-            <KPI icon={<><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></>}
-              value={sys.done_tasks} label={fa?"انجام شده":"Done"} color="var(--accent)"
-              trend={`${Math.round((sys.done_tasks/Math.max(sys.total_tasks,1))*100)}%`} trendType="up"/>
-            <KPI icon={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>}
-              value={sys.pending_tasks} label={fa?"باقیمانده":"Pending"} color="var(--amber)"
-              trend={sys.urgent_tasks>0?`${sys.urgent_tasks} ${fa?"فوری":"urgent"}`:undefined} trendType="down"/>
-            <KPI icon={<><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>}
-              value={sys.total_events} label={fa?"کل رویدادها":"Events"} color="var(--blue)"/>
-          </div>
-
-          <div className="panel" style={{ marginBottom:14 }}>
-            <div className="panel-label">{fa?"رتبه‌بندی عملکرد همه اعضا":"Full performance ranking"}</div>
-            {[...allUsers].sort((a,b)=>b.performance.done_rate-a.performance.done_rate).map(u=>(
-              <UserPerfCard key={u.id} user={u} lang={lang}
-                expanded={!!expanded[u.id]}
-                onToggle={()=>setExpanded(p=>({...p,[u.id]:!p[u.id]}))}/>
-            ))}
-          </div>
         </>
       )}
     </div>
