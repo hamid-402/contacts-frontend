@@ -46,15 +46,10 @@ function VisBadge({ value, tr }) {
 function EditModal({ contact, onSave, onClose, tr, userRole, lang }) {
   const [name,       setName]       = useState(contact.name);
   const [phone,      setPhone]      = useState(contact.phone);
-  const [category,   setCategory]   = useState(contact.category || "Other");
+  const [category,   setCategory]   = useState(contact.category || CATEGORIES[0]);
   const [visibility, setVisibility] = useState(contact.visibility || 4);
 
-  const catLabels = {
-    Work: lang === "fa" ? "کاری"    : "Work",
-    Family: lang === "fa" ? "خانواده" : "Family",
-    Friends: lang === "fa" ? "دوستان"  : "Friends",
-    Other: lang === "fa" ? "سایر"    : "Other",
-  };
+  const catLabels = Object.fromEntries(CATEGORIES.map(c => [c, c]));
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -114,7 +109,7 @@ export default function Contacts() {
   const [loading,     setLoading]     = useState(true);
   const [name,        setName]        = useState("");
   const [phone,       setPhone]       = useState("");
-  const [category,    setCategory]    = useState("Other");
+  const [category,    setCategory]    = useState(CATEGORIES[0]);
   const [visibility,  setVisibility]  = useState(4);
   const [nameErr,     setNameErr]     = useState(false);
   const [phoneErr,    setPhoneErr]    = useState(false);
@@ -129,12 +124,7 @@ export default function Contacts() {
   const { lang } = useSettings();
   const tr = t[lang];
 
-  const catLabels = {
-    Work:    lang === "fa" ? "کاری"    : "Work",
-    Family:  lang === "fa" ? "خانواده" : "Family",
-    Friends: lang === "fa" ? "دوستان"  : "Friends",
-    Other:   lang === "fa" ? "سایر"    : "Other",
-  };
+  const catLabels = Object.fromEntries(CATEGORIES.map(c => [c, c]));
 
   useEffect(() => {
     getUserProfile().then((u) => {
@@ -169,7 +159,7 @@ export default function Contacts() {
       body: JSON.stringify({ name: n, phone: p, category, date: todayKey, user_id: userId, visibility }),
     });
     const created = await res.json();
-    setName(""); setPhone(""); setCategory("Other"); setVisibility(4);
+    setName(""); setPhone(""); setCategory(CATEGORIES[0]); setVisibility(4);
     setShowForm(false);
     setNewIds((prev) => new Set([...prev, created.id]));
     setTimeout(() => setNewIds((prev) => { const s = new Set(prev); s.delete(created.id); return s; }), 3000);
@@ -191,13 +181,10 @@ export default function Contacts() {
     fetchContacts(userId);
   };
 
-  /* فیلتر بر اساس tab */
+  /* فیلتر بر اساس tab — از CATEGORIES جدید */
   const tabs = [
-    { key: "all",     label: lang === "fa" ? "همه"      : "All"     },
-    { key: "Work",    label: lang === "fa" ? "کاری"     : "Work"    },
-    { key: "Family",  label: lang === "fa" ? "خانواده"  : "Family"  },
-    { key: "Friends", label: lang === "fa" ? "دوستان"   : "Friends" },
-    { key: "Other",   label: lang === "fa" ? "سایر"     : "Other"   },
+    { key: "all", label: lang === "fa" ? "همه" : "All" },
+    ...CATEGORIES.map(cat => ({ key: cat, label: cat })),
   ];
 
   const filtered = activeTab === "all"
