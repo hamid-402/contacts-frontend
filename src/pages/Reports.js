@@ -166,6 +166,7 @@ export default function Reports() {
   const [myEvents,   setMyEvents]   = useState([]);
   const [allData,    setAllData]    = useState(null);
   const [teamData,   setTeamData]   = useState(null);
+  const [deptData,   setDeptData]   = useState(null);
 
   const today = todayJalaali();
 
@@ -185,8 +186,12 @@ export default function Reports() {
         setMyEvents(Array.isArray(events)?events:[]);
 
         if (u.role === 1) {
-          const all = await fetch(`${API}/reports/all?user_id=${u.id}`).then(r=>r.json());
+          const [all, depts] = await Promise.all([
+            fetch(`${API}/reports/all?user_id=${u.id}`).then(r=>r.json()),
+            fetch(`${API}/reports/departments?user_id=${u.id}`).then(r=>r.json()),
+          ]);
           setAllData(all);
+          setDeptData(depts);
         } else if (u.role === 2) {
           const team = await fetch(`${API}/reports/team?user_id=${u.id}`).then(r=>r.json());
           setTeamData(team);
@@ -226,20 +231,23 @@ export default function Reports() {
   if (myPerf?.urgent_tasks>0)  personalAlerts.push({ type:"amber", msg:fa?`${myPerf.urgent_tasks} وظیفه فوری باقیمانده`:`${myPerf.urgent_tasks} urgent tasks pending` });
   if (thisMonthEvents.length===0) personalAlerts.push({ type:"blue", msg:fa?"هیچ رویدادی برای این ماه ثبت نشده":"No events this month" });
 
-  /* ── بخش‌ها ── */
+  /* ── بخش‌ها — از API ── */
   const allUsers  = allData?.users || [];
-  const deptStats = CATEGORIES.map(dept => {
-    const members = allUsers.filter(u=>u.department===dept);
-    if (members.length===0) return null;
-    const manager  = members.find(u=>u.role<=2);
-    const avgRate  = members.length>0
-      ? Math.round(members.reduce((s,u)=>s+u.performance.done_rate,0)/members.length) : 0;
-    const totalTasks   = members.reduce((s,u)=>s+u.performance.total_tasks,0);
-    const doneTasks    = members.reduce((s,u)=>s+u.performance.done_tasks,0);
-    const overdueTasks = members.reduce((s,u)=>s+u.performance.overdue_tasks,0);
-    const contacts     = myContacts.filter(c=>c.category===dept).length;
-    return { dept, members, manager, avgRate, totalTasks, doneTasks, overdueTasks, contacts };
-  }).filter(Boolean).sort((a,b)=>b.avgRate-a.avgRate);
+  const deptStats = (deptData?.departments || [])
+    .filter(d => d.hasData)
+    .map(dept => {
+      /* عملکرد اعضا رو از allData بگیر */
+      const membersWithPerf = dept.members.map(m => {
+        const fullUser = allUsers.find(u => u.id === m.id);
+        return fullUser || m;
+      });
+      const avgRate = membersWithPerf.length > 0
+        ? Math.round(membersWithPerf.reduce((s,u) => s + (u.performance?.done_rate||0), 0) / membersWithPerf.length)
+        : 0;
+      const overdueTasks = membersWithPerf.reduce((s,u) => s + (u.performance?.overdue_tasks||0), 0);
+      return { ...dept, members: membersWithPerf, avgRate, overdueTasks };
+    })
+    .sort((a,b) => b.avgRate - a.avgRate);
 
   /* ── اعضا با فیلتر ── */
   const sourceUsers = userRole===1 ? allUsers : (teamData?.users||[]);
@@ -604,15 +612,17 @@ export default function Reports() {
                 {fa?"بازگشت به بخش‌ها":"Back to departments"}
               </button>
 
+              {/* هدر بخش */}
               <div className="panel" style={{ marginBottom:14 }}>
-                <h3 style={{ fontFamily:"Syne,sans-serif", fontWeight:700, fontSize:16, color:"var(--text1)", marginBottom:8 }}>
-                  {selectedDept.dept}
+                <h3 style={{ fontFamily:"Syne,sans-serif", fontWeight:700, fontSize:16, color:"var(--text1)", marginBottom:10 }}>
+                  {selectedDept.name}
                 </h3>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:6, marginBottom:10 }}>
                   {[
-                    { label:fa?"اعضا":"Members",       value:selectedDept.members.length,  color:"var(--blue)" },
-                    { label:fa?"تکمیل":"Completion",   value:`${selectedDept.avgRate}%`,   color:"var(--accent)" },
-                    { label:fa?"تاخیر":"Overdue",      value:selectedDept.overdueTasks,    color:"var(--red)" },
+                    { label:fa?"اعضا":"Members",       value:selectedDept.memberCount,  color:"var(--blue)" },
+                    { label:fa?"مخاطبین":"Contacts",   value:selectedDept.contactCount, color:"var(--accent)" },
+                    { label:fa?"تکمیل":"Completion",   value:`${selectedDept.avgRate}%`,color:"var(--accent)" },
+                    { label:fa?"تاخیر":"Overdue",      value:selectedDept.overdueTasks, color:"var(--red)" },
                   ].map(({label,value,color})=>(
                     <div key={label} style={{ background:"var(--bg4)", borderRadius:"var(--radius-sm)", padding:"10px", textAlign:"center" }}>
                       <div style={{ fontSize:18, fontFamily:"Syne,sans-serif", fontWeight:800, color }}>{value}</div>
@@ -620,55 +630,101 @@ export default function Reports() {
                     </div>
                   ))}
                 </div>
-                {selectedDept.manager&&(
-                  <div style={{ marginTop:10, fontSize:12, color:"var(--text3)" }}>
-                    {fa?"مدیر:":"Manager:"} <span style={{ color:"var(--text1)", fontWeight:500 }}>{selectedDept.manager.full_name}</span>
+                {selectedDept.manager && (
+                  <div style={{ fontSize:12, color:"var(--text3)", display:"flex", alignItems:"center", gap:6 }}>
+                    <svg viewBox="0 0 24 24" style={{ width:12, height:12, stroke:"var(--text3)", fill:"none", strokeWidth:2 }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    {fa?"مدیر بخش:":"Manager:"}{" "}
+                    <span style={{ color:"var(--text1)", fontWeight:500 }}>{selectedDept.manager.full_name}</span>
                   </div>
                 )}
               </div>
 
-              {selectedDept.members.map(u=>(
-                <UserPerfCard key={u.id} user={u} lang={lang}
-                  expanded={!!expanded[u.id]}
-                  onToggle={()=>setExpanded(p=>({...p,[u.id]:!p[u.id]}))}/>
-              ))}
+              {/* اعضا */}
+              {selectedDept.members.length > 0 && (
+                <div style={{ marginBottom:14 }}>
+                  <div className="section-title" style={{ marginBottom:8 }}>{fa?"اعضای بخش":"Department members"}</div>
+                  {selectedDept.members.map(u=>(
+                    <UserPerfCard key={u.id} user={u} lang={lang}
+                      expanded={!!expanded[u.id]}
+                      onToggle={()=>setExpanded(p=>({...p,[u.id]:!p[u.id]}))}/>
+                  ))}
+                </div>
+              )}
+
+              {/* مخاطبین */}
+              {selectedDept.contacts.length > 0 && (
+                <div>
+                  <div className="section-title" style={{ marginBottom:8 }}>{fa?"مخاطبین بخش":"Department contacts"}</div>
+                  <div className="contact-list">
+                    {selectedDept.contacts.map(c=>(
+                      <div key={c.id} className="contact-item" style={{ cursor:"default" }}>
+                        <div style={{ width:32, height:32, borderRadius:8, background:"var(--accent-bg)",
+                          border:"0.5px solid #00d98b22", display:"flex", alignItems:"center",
+                          justifyContent:"center", fontFamily:"Syne,sans-serif", fontWeight:700,
+                          fontSize:12, color:"var(--accent)", flexShrink:0 }}>
+                          {(c.name||"?")[0]}
+                        </div>
+                        <div className="contact-info">
+                          <div className="contact-name">{c.name}</div>
+                          <div className="contact-phone" dir="ltr">{c.phone}</div>
+                        </div>
+                        <span className="vis-badge vis-4" style={{ fontSize:9 }}>
+                          {["","محرمانه","نیمه محرمانه","عمومی","همه"][c.visibility]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDept.members.length===0 && selectedDept.contacts.length===0 && (
+                <div className="empty-state">
+                  <div className="empty-icon">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                  </div>
+                  <p>{fa?"این بخش خالی است":"This department is empty"}</p>
+                </div>
+              )}
             </>
           ):(
             <>
-              <div className="panel-label" style={{ marginBottom:10 }}>
-                {fa?"کلیک روی هر بخش برای مشاهده جزئیات":"Click a department to see details"}
+              <div style={{ fontSize:12, color:"var(--text3)", marginBottom:12 }}>
+                {fa?"کلیک روی هر بخش برای مشاهده اعضا و مخاطبین":"Click a department to see members and contacts"}
               </div>
               {deptStats.length===0?(
                 <div className="empty-state">
                   <div className="empty-icon">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                   </div>
-                  <p>{fa?"هیچ بخشی تعریف نشده":"No departments defined"}</p>
+                  <p>{fa?"هیچ بخشی داده ندارد — ابتدا از Admin بخش کاربران را تعیین کنید":"No department data — assign departments in Admin first"}</p>
                 </div>
               ):(
                 deptStats.map(dept=>{
                   const perfColor=dept.avgRate>=70?"var(--accent)":dept.avgRate>=40?"var(--amber)":"var(--red)";
                   return(
-                    <div key={dept.dept} className="panel" style={{ marginBottom:8, cursor:"pointer" }}
+                    <div key={dept.name} className="panel" style={{ marginBottom:8, cursor:"pointer" }}
                       onClick={()=>setSelectedDept(dept)}>
                       <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                        <div style={{ width:40, height:40, borderRadius:10, background:"var(--accent-bg)",
+                        <div style={{ width:42, height:42, borderRadius:10, background:"var(--accent-bg)",
                           border:"0.5px solid #00d98b22", display:"flex", alignItems:"center", justifyContent:"center",
-                          fontFamily:"Syne,sans-serif", fontWeight:800, fontSize:13, color:"var(--accent)", flexShrink:0 }}>
-                          {dept.dept[0]}
+                          fontFamily:"Syne,sans-serif", fontWeight:800, fontSize:14, color:"var(--accent)", flexShrink:0 }}>
+                          {dept.name[0]}
                         </div>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:14, fontWeight:600, color:"var(--text1)" }}>{dept.dept}</div>
-                          <div style={{ fontSize:11, color:"var(--text3)", marginTop:2 }}>
-                            {dept.members.length} {fa?"نفر":"members"}
-                            {dept.manager&&<> · {fa?"مدیر:":"Manager:"} {dept.manager.full_name}</>}
+                          <div style={{ fontSize:14, fontWeight:600, color:"var(--text1)" }}>{dept.name}</div>
+                          <div style={{ fontSize:11, color:"var(--text3)", marginTop:3, display:"flex", gap:10 }}>
+                            <span>{dept.memberCount} {fa?"نفر":"members"}</span>
+                            <span>{dept.contactCount} {fa?"مخاطب":"contacts"}</span>
+                            {dept.manager&&<span>{fa?"مدیر:":"Mgr:"} {dept.manager.full_name}</span>}
                           </div>
                         </div>
-                        <div style={{ textAlign:"center", flexShrink:0 }}>
-                          <div style={{ fontSize:18, fontFamily:"Syne,sans-serif", fontWeight:800, color:perfColor }}>
-                            {fa?toFarsiNum(dept.avgRate):dept.avgRate}%
+                        <div style={{ textAlign:"center", flexShrink:0, minWidth:48 }}>
+                          <div style={{ fontSize:18, fontFamily:"Syne,sans-serif", fontWeight:800, color:dept.memberCount>0?perfColor:"var(--text4)" }}>
+                            {dept.memberCount>0?(fa?toFarsiNum(dept.avgRate):dept.avgRate)+"%":"—"}
                           </div>
-                          <div style={{ fontSize:9, color:"var(--text3)" }}>{fa?"میانگین":"avg"}</div>
+                          <div style={{ fontSize:9, color:"var(--text3)" }}>{fa?"تکمیل":"completion"}</div>
                         </div>
                         {dept.overdueTasks>0&&(
                           <span style={{ fontSize:10, background:"var(--red)", color:"#fff",
@@ -680,9 +736,11 @@ export default function Reports() {
                           <polyline points="9 18 15 12 9 6"/>
                         </svg>
                       </div>
-                      <div style={{ marginTop:8 }}>
-                        <Bar value={dept.avgRate} max={100} color={perfColor} height={4}/>
-                      </div>
+                      {dept.memberCount>0&&(
+                        <div style={{ marginTop:8 }}>
+                          <Bar value={dept.avgRate} max={100} color={perfColor} height={4}/>
+                        </div>
+                      )}
                     </div>
                   );
                 })
