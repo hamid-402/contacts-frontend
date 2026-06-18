@@ -54,7 +54,7 @@ function UserPerfCard({ user, lang, expanded, onToggle }) {
   const fa = lang === "fa";
   const p  = user.performance;
   const roleColors = { 1:"var(--red)", 2:"var(--blue)", 3:"var(--accent)", 4:"var(--purple)" };
-  const roleLabels = { 1:fa?"مدیر ارشد":"Senior", 2:fa?"مدیر":"Manager", 3:fa?"کارمند":"Employee", 4:fa?"کاربر":"User" };
+  const roleLabels = { 1:fa?"ادمین":"Admin", 2:fa?"مدیر":"Manager", 3:fa?"کارمند":"Employee", 4:fa?"کاربر":"User" };
   const color      = roleColors[user.role];
   const perfColor  = p.done_rate >= 70 ? "var(--accent)" : p.done_rate >= 40 ? "var(--amber)" : "var(--red)";
 
@@ -239,13 +239,18 @@ export default function Reports() {
       /* عملکرد اعضا رو از allData بگیر */
       const membersWithPerf = dept.members.map(m => {
         const fullUser = allUsers.find(u => u.id === m.id);
-        return fullUser || m;
+        return fullUser || { ...m, performance: { done_rate:0, done_tasks:0, pending_tasks:0, overdue_tasks:0, urgent_tasks:0, total_tasks:0, total_events:0, urgent_rate:0 } };
       });
-      const avgRate = membersWithPerf.length > 0
+      const avgRate = membersWithPerf.filter(u=>u.performance).length > 0
         ? Math.round(membersWithPerf.reduce((s,u) => s + (u.performance?.done_rate||0), 0) / membersWithPerf.length)
         : 0;
       const overdueTasks = membersWithPerf.reduce((s,u) => s + (u.performance?.overdue_tasks||0), 0);
-      return { ...dept, members: membersWithPerf, avgRate, overdueTasks };
+      return {
+        ...dept,
+        members: membersWithPerf,
+        avgRate,
+        overdueTasks,
+      };
     })
     .sort((a,b) => b.avgRate - a.avgRate);
 
@@ -533,7 +538,7 @@ export default function Reports() {
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6, marginTop:12 }}>
                 {[
-                  { label:fa?"مدیر ارشد":"Senior", count:allUsers.filter(u=>u.role===1).length, color:"var(--red)" },
+                  { label:fa?"ادمین":"Admin", count:allUsers.filter(u=>u.role===1).length, color:"var(--red)" },
                   { label:fa?"مدیر":"Manager",      count:allUsers.filter(u=>u.role===2).length, color:"var(--blue)" },
                   { label:fa?"کارمند":"Employee",   count:allUsers.filter(u=>u.role>=3).length,  color:"var(--accent)" },
                 ].map(({label,count,color})=>(

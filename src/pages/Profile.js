@@ -54,7 +54,7 @@ export default function Profile() {
   };
 
   const roleLabels = {
-    1: fa ? "مدیر ارشد"   : "Senior Manager",
+    1: fa ? "ادمین"   : "Admin",
     2: fa ? "مدیر"        : "Manager",
     3: fa ? "کارمند"      : "Employee",
     4: fa ? "کاربر عادی" : "Regular User",

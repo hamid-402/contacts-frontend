@@ -119,7 +119,7 @@ export default function Admin() {
     addedOk:     fa?"کاربر با موفقیت اضافه شد":"User added",
     deleteConfirm:fa?"آیا از حذف این کاربر اطمینان دارید؟":"Are you sure?",
     noAccess:    fa?"شما دسترسی به این صفحه ندارید":"No access",
-    senior:      fa?"مدیر ارشد":"Senior Manager", manager:fa?"مدیر":"Manager",
+    senior:      fa?"ادمین":"Admin", manager:fa?"مدیر":"Manager",
     employee:    fa?"کارمند":"Employee",           user:fa?"کاربر عادی":"Regular User",
     vis1:fa?"محرمانه":"Confidential", vis2:fa?"نیمه محرمانه":"Semi-confidential",
     vis3:fa?"عمومی شرکت":"Company-wide", vis4:fa?"همه":"Everyone",
