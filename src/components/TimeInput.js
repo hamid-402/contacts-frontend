@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /**
  * TimeInput — همیشه فرمت ۲۴ ساعته نمایش میده
@@ -6,14 +6,16 @@ import { useState, useEffect } from "react";
  * onChange: (val) => void — val به فرمت "HH:mm"
  */
 export default function TimeInput({ value, onChange, placeholder, style }) {
-  const [hour,   setHour]   = useState("");
-  const [minute, setMinute] = useState("");
+  const [hour,    setHour]    = useState("");
+  const [minute,  setMinute]  = useState("");
+  const [focused, setFocused] = useState(false);
+  const hourRef   = useRef(null);
+  const minuteRef = useRef(null);
 
-  /* مقدار اولیه */
   useEffect(() => {
     if (value) {
       const parts = value.split(":");
-      setHour(parts[0]   || "");
+      setHour(parts[0] || "");
       setMinute(parts[1] ? parts[1].slice(0, 2) : "");
     } else {
       setHour(""); setMinute("");
@@ -29,21 +31,17 @@ export default function TimeInput({ value, onChange, placeholder, style }) {
 
   const handleHour = (e) => {
     let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 2) v = v.slice(0, 2);
+    if (v.length > 2) v = v.slice(-1);
     const n = parseInt(v, 10);
     if (v !== "" && (isNaN(n) || n > 23)) return;
     setHour(v);
     emit(v, minute);
-    /* اگه ۲ رقم شد برو به دقیقه */
-    if (v.length === 2) {
-      const next = document.getElementById(`time-min-${placeholder}`);
-      if (next) next.focus();
-    }
+    if (v.length === 2) minuteRef.current?.focus();
   };
 
   const handleMinute = (e) => {
     let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 2) v = v.slice(0, 2);
+    if (v.length > 2) v = v.slice(-1);
     const n = parseInt(v, 10);
     if (v !== "" && (isNaN(n) || n > 59)) return;
     setMinute(v);
@@ -51,20 +49,27 @@ export default function TimeInput({ value, onChange, placeholder, style }) {
   };
 
   const handleHourKey = (e) => {
-    if (e.key === ":" || e.key === "ArrowLeft") {
-      const next = document.getElementById(`time-min-${placeholder}`);
-      if (next) next.focus();
-    }
+    if (e.key === ":" || e.key === "ArrowRight") minuteRef.current?.focus();
+    if (e.key === "Backspace" && hour === "") { onChange(""); }
   };
+
+  const handleMinuteKey = (e) => {
+    if (e.key === "Backspace" && minute === "") hourRef.current?.focus();
+  };
+
+  const showPlaceholder = !hour && !minute && !focused;
 
   const wrap = {
     display: "flex",
     alignItems: "center",
-    gap: 2,
     background: "var(--bg)",
-    border: "0.5px solid var(--border)",
+    border: `0.5px solid ${focused ? "#00d98b33" : "var(--border)"}`,
     borderRadius: "var(--radius)",
     padding: "11px 14px 11px 42px",
+    cursor: "text",
+    boxShadow: focused ? "0 0 0 3px #00d98b08" : "none",
+    transition: "border-color .2s, box-shadow .2s",
+    position: "relative",
     ...style,
   };
 
@@ -75,53 +80,46 @@ export default function TimeInput({ value, onChange, placeholder, style }) {
     color: "var(--text2)",
     fontFamily: "DM Sans, sans-serif",
     fontSize: 13,
-    width: 28,
+    width: showPlaceholder ? 0 : 26,
     textAlign: "center",
     padding: 0,
+    opacity: showPlaceholder ? 0 : 1,
+    transition: "width .1s, opacity .1s",
   };
-
-  const sep = {
-    color: "var(--text3)",
-    fontSize: 14,
-    userSelect: "none",
-    lineHeight: 1,
-  };
-
-  const ph = {
-    color: "var(--text4)",
-    fontSize: 13,
-    fontFamily: "DM Sans, sans-serif",
-  };
-
-  if (!hour && !minute && placeholder) {
-    return (
-      <div style={{ ...wrap, cursor: "text" }}
-        onClick={() => document.getElementById(`time-hr-${placeholder}`)?.focus()}>
-        <span style={ph}>{placeholder}</span>
-      </div>
-    );
-  }
 
   return (
-    <div style={wrap}>
+    <div style={wrap} onClick={() => hourRef.current?.focus()}>
+      {showPlaceholder && (
+        <span style={{ color:"var(--text4)", fontSize:13, fontFamily:"DM Sans,sans-serif",
+          position:"absolute", pointerEvents:"none" }}>
+          {placeholder || "HH:mm"}
+        </span>
+      )}
       <input
-        id={`time-hr-${placeholder}`}
+        ref={hourRef}
         style={inp}
         value={hour}
         onChange={handleHour}
         onKeyDown={handleHourKey}
-        placeholder="HH"
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(minuteRef.current === document.activeElement)}
+        placeholder={showPlaceholder ? "" : "HH"}
         maxLength={2}
         inputMode="numeric"
         dir="ltr"
       />
-      <span style={sep}>:</span>
+      {!showPlaceholder && (
+        <span style={{ color:"var(--text3)", fontSize:14, userSelect:"none", lineHeight:1, margin:"0 1px" }}>:</span>
+      )}
       <input
-        id={`time-min-${placeholder}`}
+        ref={minuteRef}
         style={inp}
         value={minute}
         onChange={handleMinute}
-        placeholder="mm"
+        onKeyDown={handleMinuteKey}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={showPlaceholder ? "" : "mm"}
         maxLength={2}
         inputMode="numeric"
         dir="ltr"
