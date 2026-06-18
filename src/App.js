@@ -16,13 +16,14 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Tasks from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
+import Reports from "./pages/Reports";
 
 function PrivateRoute({ children, user }) {
   return user ? children : <Navigate to="/login" />;
 }
 
 export default function App() {
-  const [user, setUser]       = useState(null);
+  const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,22 +45,23 @@ export default function App() {
     <SettingsProvider>
       <BrowserRouter>
         <div className="app-bg">
-          <TopBar />
+          {user && <TopBar />}
           <div className="app-layout">
             {user && <Navbar user={user} />}
             <main className="app-main">
               <Routes>
-                <Route path="/login"        element={<Login />} />
-                <Route path="/register"     element={<Register />} />
-                <Route path="/"             element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
-                <Route path="/contacts"     element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
-                <Route path="/contacts/:id" element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
-                <Route path="/search"       element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
-                <Route path="/categories"   element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
-                <Route path="/admin"        element={<PrivateRoute user={user}><Admin /></PrivateRoute>} />
-                <Route path="/profile" element={<PrivateRoute user={user}><Profile /></PrivateRoute>} />
-                <Route path="/tasks" element={<PrivateRoute user={user}><Tasks /></PrivateRoute>} />
-                <Route path="/calendar" element={<PrivateRoute user={user}><Calendar /></PrivateRoute>} />
+                <Route path="/login"            element={<Login />} />
+                <Route path="/register"         element={<Register />} />
+                <Route path="/"                 element={<PrivateRoute user={user}><Home /></PrivateRoute>} />
+                <Route path="/contacts"         element={<PrivateRoute user={user}><Contacts /></PrivateRoute>} />
+                <Route path="/contacts/:id"     element={<PrivateRoute user={user}><ContactDetail /></PrivateRoute>} />
+                <Route path="/search"           element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
+                <Route path="/categories"       element={<PrivateRoute user={user}><Categories /></PrivateRoute>} />
+                <Route path="/tasks"            element={<PrivateRoute user={user}><Tasks /></PrivateRoute>} />
+                <Route path="/calendar"         element={<PrivateRoute user={user}><Calendar /></PrivateRoute>} />
+                <Route path="/reports"          element={<PrivateRoute user={user}><Reports /></PrivateRoute>} />
+                <Route path="/profile"          element={<PrivateRoute user={user}><Profile /></PrivateRoute>} />
+                <Route path="/admin"            element={<PrivateRoute user={user}><Admin /></PrivateRoute>} />
               </Routes>
             </main>
           </div>

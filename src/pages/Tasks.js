@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
 import PersianDatePicker from "../components/PersianDatePicker";
+import TimeInput from "../components/TimeInput";
 
 /* ── SVG آیکون‌ها ── */
 const IconPlus     = () => <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
@@ -272,13 +273,11 @@ export default function Tasks() {
           </div>
           <div className="input-wrap">
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={startTime}
-              onChange={(e) => setStartTime(e.target.value)} />
+            <TimeInput value={startTime} onChange={setStartTime} placeholder={txt.taskStart} />
           </div>
           <div className="input-wrap" style={{ marginBottom: 0 }}>
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={endTime}
-              onChange={(e) => setEndTime(e.target.value)} />
+            <TimeInput value={endTime} onChange={setEndTime} placeholder={txt.taskEnd} />
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button className="btn-cancel" onClick={() => setShowForm(false)}>{txt.cancel}</button>
@@ -318,13 +317,11 @@ export default function Tasks() {
           </div>
           <div className="input-wrap">
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={evStart}
-              onChange={(e) => setEvStart(e.target.value)} />
+            <TimeInput value={evStart} onChange={setEvStart} placeholder={txt.taskStart} />
           </div>
           <div className="input-wrap" style={{ marginBottom: 0 }}>
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={evEnd}
-              onChange={(e) => setEvEnd(e.target.value)} />
+            <TimeInput value={evEnd} onChange={setEvEnd} placeholder={txt.taskEnd} />
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button className="btn-cancel" onClick={() => setShowEvent(false)}>{txt.cancel}</button>
@@ -459,15 +456,17 @@ export default function Tasks() {
             </div>
             <div className="input-wrap">
               <span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time"
+              <TimeInput
                 value={editTarget.start_time ? editTarget.start_time.slice(0, 5) : ""}
-                onChange={(e) => setEditTarget({ ...editTarget, start_time: e.target.value })} />
+                onChange={(v) => setEditTarget({ ...editTarget, start_time: v })}
+                placeholder={txt.taskStart} />
             </div>
             <div className="input-wrap" style={{ marginBottom: 0 }}>
               <span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time"
+              <TimeInput
                 value={editTarget.end_time ? editTarget.end_time.slice(0, 5) : ""}
-                onChange={(e) => setEditTarget({ ...editTarget, end_time: e.target.value })} />
+                onChange={(v) => setEditTarget({ ...editTarget, end_time: v })}
+                placeholder={txt.taskEnd} />
             </div>
 
             <div className="modal-btns">

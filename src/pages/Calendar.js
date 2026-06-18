@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { API, getUserProfile } from "../components/shared";
 import { useSettings } from "../context/SettingsContext";
 import jalaali from "jalaali-js";
+import TimeInput from "../components/TimeInput";
 
 const MONTHS_FA = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 const MONTHS_EN = ["Farvardin","Ordibehesht","Khordad","Tir","Mordad","Shahrivar","Mehr","Aban","Azar","Dey","Bahman","Esfand"];
@@ -312,11 +313,11 @@ export default function Calendar() {
           </div>
           <div className="input-wrap">
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={taskStart} onChange={(e) => setTaskStart(e.target.value)} />
+            <TimeInput value={taskStart} onChange={setTaskStart} placeholder="HH:mm" />
           </div>
           <div className="input-wrap" style={{ marginBottom:0 }}>
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={taskEnd} onChange={(e) => setTaskEnd(e.target.value)} />
+            <TimeInput value={taskEnd} onChange={setTaskEnd} placeholder="HH:mm" />
           </div>
           <div style={{ display:"flex", gap:8, marginTop:12 }}>
             <button className="btn-cancel" onClick={() => setShowAddTask(false)}>{txt.cancel}</button>
@@ -350,11 +351,11 @@ export default function Calendar() {
           </div>
           <div className="input-wrap">
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={evStart} onChange={(e) => setEvStart(e.target.value)} />
+            <TimeInput value={evStart} onChange={setEvStart} placeholder="HH:mm" />
           </div>
           <div className="input-wrap" style={{ marginBottom:0 }}>
             <span className="input-icon"><IconClock /></span>
-            <input className="app-input" type="time" value={evEnd} onChange={(e) => setEvEnd(e.target.value)} />
+            <TimeInput value={evEnd} onChange={setEvEnd} placeholder="HH:mm" />
           </div>
           <div style={{ display:"flex", gap:8, marginTop:12 }}>
             <button className="btn-cancel" onClick={() => setShowAddEvent(false)}>{txt.cancel}</button>
@@ -479,12 +480,12 @@ export default function Calendar() {
               </select>
             </div>
             <div className="input-wrap"><span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time" value={editTask.start_time ? editTask.start_time.slice(0,5) : ""}
-                onChange={(e) => setEditTask({ ...editTask, start_time: e.target.value })} />
+              <TimeInput value={editTask.start_time ? editTask.start_time.slice(0,5) : ""}
+                onChange={(v) => setEditTask({ ...editTask, start_time: v })} placeholder="HH:mm" />
             </div>
             <div className="input-wrap" style={{ marginBottom:0 }}><span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time" value={editTask.end_time ? editTask.end_time.slice(0,5) : ""}
-                onChange={(e) => setEditTask({ ...editTask, end_time: e.target.value })} />
+              <TimeInput value={editTask.end_time ? editTask.end_time.slice(0,5) : ""}
+                onChange={(v) => setEditTask({ ...editTask, end_time: v })} placeholder="HH:mm" />
             </div>
             <div className="modal-btns">
               <button className="btn-cancel" onClick={() => setEditTask(null)}>{txt.cancel}</button>
@@ -517,12 +518,12 @@ export default function Calendar() {
               </select>
             </div>
             <div className="input-wrap"><span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time" value={editEvent.start_time ? editEvent.start_time.slice(0,5) : ""}
-                onChange={(e) => setEditEvent({ ...editEvent, start_time: e.target.value })} />
+              <TimeInput value={editEvent.start_time ? editEvent.start_time.slice(0,5) : ""}
+                onChange={(v) => setEditEvent({ ...editEvent, start_time: v })} placeholder="HH:mm" />
             </div>
             <div className="input-wrap" style={{ marginBottom:0 }}><span className="input-icon"><IconClock /></span>
-              <input className="app-input" type="time" value={editEvent.end_time ? editEvent.end_time.slice(0,5) : ""}
-                onChange={(e) => setEditEvent({ ...editEvent, end_time: e.target.value })} />
+              <TimeInput value={editEvent.end_time ? editEvent.end_time.slice(0,5) : ""}
+                onChange={(v) => setEditEvent({ ...editEvent, end_time: v })} placeholder="HH:mm" />
             </div>
             <div className="modal-btns">
               <button className="btn-cancel" onClick={() => setEditEvent(null)}>{txt.cancel}</button>
